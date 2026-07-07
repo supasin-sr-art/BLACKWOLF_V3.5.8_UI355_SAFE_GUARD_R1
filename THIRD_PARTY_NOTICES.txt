@@ -1,0 +1,10 @@
+BLACKWOLF V3.5.8 uses xlsx-js-style to read and write Excel workbooks locally in the browser.
+License: vendor/XLSX_JS_STYLE_LICENSE
+
+BLACKWOLF V3.5.8 uses JSZip to preserve the original Excel PivotTable, PivotCache, table, and worksheet package parts while updating PV, PV Final, and Report data.
+License: vendor/JSZIP_LICENSE
+
+BLACKWOLF V3.5.8 uses html2canvas 1.4.1 for local PNG report capture.
+License: vendor/HTML2CANVAS_LICENSE
+
+All uploaded files remain in the user's browser. These libraries do not upload workbook data to an external server.

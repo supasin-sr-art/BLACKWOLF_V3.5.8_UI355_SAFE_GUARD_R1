@@ -1,0 +1,334 @@
+<!doctype html>
+<!-- BLACKWOLF HTML TEACHING COMMENTS: คอมเมนต์ HTML ใช้รูปแบบนี้เพื่อไม่ให้หน้าเว็บพัง -->
+<html lang="th">
+<head>
+  <!-- STEP 1: head เก็บ metadata, icon, viewport, title และ CSS loader -->
+  <meta charset="utf-8">
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="assets/blackwolf-logo.png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="assets/blackwolf-logo.png"
+  >
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+
+  <title>BLACKWOLF V3.5.8 — Professional Browser Web</title>
+
+  <link rel="stylesheet" href="styles.css?v=3.5.8">
+
+
+</head>
+<body class="auth-locked">
+<!-- STEP 2: เริ่มต้นด้วย auth-locked เพื่อซ่อน app จนกว่าจะ login ผ่าน -->
+<!-- STEP 3: auth-screen คือหน้าล็อกอินที่ auth.js ควบคุม -->
+<div class="auth-screen" id="authScreen" aria-labelledby="authTitle">
+  <div class="auth-background-shape auth-shape-one"></div>
+  <div class="auth-background-shape auth-shape-two"></div>
+  <section class="auth-card">
+    <div class="auth-brand-panel">
+      <div class="auth-logo-wrap"><img src="assets/blackwolf-logo.png" alt="BLACKWOLF"></div>
+      <h1>BLACKWOLF</h1>
+      <p class="auth-brand-subtitle">WORKFLOW PLATFORM</p>
+      <p class="auth-brand-copy">แพลตฟอร์มบริหารจัดการกระบวนการทำงานที่ปลอดภัย เชื่อมต่อ และมีประสิทธิภาพ</p>
+      <div class="auth-security-note"><span>✓</span><div><strong>Hashed Local Access</strong><small>ตรวจรหัสด้วย PBKDF2 Hash และประมวลผลไฟล์ภายใน Browser เครื่องนี้</small></div></div>
+    </div>
+    <form class="auth-form" id="authForm" autocomplete="off">
+      <span class="auth-eyebrow">AUTHORIZED ACCESS</span>
+      <h2 id="authTitle">ลงชื่อเข้าใช้</h2>
+      <p>กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+      <label class="auth-field">
+        <span>ชื่อผู้ใช้ <em>(Username)</em></span>
+        <div><b>◉</b><input id="authUsername" name="username" type="text" inputmode="text" autocomplete="username" placeholder="กรอกชื่อผู้ใช้" required></div>
+      </label>
+      <label class="auth-field">
+        <span>รหัสผ่าน <em>(Password)</em></span>
+        <div><b>▣</b><input id="authPassword" name="password" type="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน" required><button id="togglePasswordBtn" type="button" aria-label="แสดงหรือซ่อนรหัสผ่าน" title="แสดงหรือซ่อนรหัสผ่าน">◉</button></div>
+      </label>
+      <label class="auth-remember" for="rememberPassword">
+        <input id="rememberPassword" name="rememberPassword" type="checkbox">
+        <span class="auth-remember-box" aria-hidden="true">✓</span>
+        <span class="auth-remember-copy"><strong>จดจำชื่อผู้ใช้</strong><small>บันทึกเฉพาะชื่อผู้ใช้ ไม่บันทึกรหัสผ่านใน Browser</small></span>
+      </label>
+      <p class="auth-error" id="authError" role="alert"></p>
+      <button class="auth-submit" type="submit"><span>▣</span> ล็อกอินเข้าสู่ระบบ</button>
+      <div class="auth-footnote"><span>◈</span><div><strong>การเข้าถึงแบบจำกัดสิทธิ์</strong><small>ผู้ใช้ที่กรอกข้อมูลถูกต้องเท่านั้นจึงจะเข้าสู่หน้าทำงานได้</small></div></div>
+    </form>
+  </section>
+</div>
+<!-- STEP 4: app-shell คือหน้าหลักทั้งหมด หลัง login แล้วจึง aria-hidden=false -->
+<div class="app-shell" id="applicationShell" aria-hidden="true">
+  <aside class="sidebar">
+    <!-- STEP 5: sidebar เก็บ brand, menu navigation และสถานะ engine -->
+    <div class="brand">
+      <img src="assets/blackwolf-logo.png" alt="BLACKWOLF">
+      <div><strong>BLACKWOLF</strong><span>PROFESSIONAL WEB V3.5.8</span></div>
+    </div>
+    <nav>
+      <button class="nav active" data-page="prepare"><span>▶</span><b>เตรียมไฟล์และรัน</b></button>
+      <button class="nav" data-page="dashboard"><span>⌂</span><b>แดชบอร์ดผู้บริหาร</b></button>
+      <button class="nav" data-page="results"><span>⇩</span><b>ตรวจผลและดาวน์โหลด</b></button>
+      <button class="nav" data-page="report"><span>▧</span><b>รายงานผู้บริหาร</b></button>
+      <button class="nav" data-page="history"><span>◷</span><b>ประวัติการรัน</b></button>
+      <button class="nav" data-page="settings"><span>⚙</span><b>การตั้งค่า</b></button>
+    </nav>
+    <div class="engine-card"><i></i><div><strong id="engineReadyText">Browser Worker Engine Ready</strong><small>No PowerShell · Local-only processing</small></div></div>
+  </aside>
+
+  <main>
+    <!-- STEP 6: main เก็บทุก page เช่น prepare, dashboard, results, report, history, settings -->
+    <header class="topbar">
+      <div><small>Foreign Worker Policy Review</small><h1 id="pageTitle">เตรียมไฟล์และรัน</h1></div>
+      <div class="top-actions">
+        <div class="clock-box"><small>วันเวลาปัจจุบัน</small><strong id="liveDateTime">-</strong></div>
+        <span class="mode-chip">LOCAL PROCESSING</span>
+        <span class="status-chip" id="globalStatus">WAITING</span>
+        <div class="current-run-box"><small>CURRENT RUN</small><strong id="currentRunLabel">-</strong></div>
+        <button id="guideBtn" class="top-guide-btn" type="button">? วิธีใช้งาน</button>
+        <button id="themeBtn" class="icon-btn" title="สลับธีม" type="button" aria-label="สลับธีม">◐</button>
+        <button id="logoutBtn" class="top-logout-btn" type="button" title="ออกจากระบบ">ออกจากระบบ</button>
+      </div>
+    </header>
+
+    <section class="page active" id="page-prepare">
+      <div class="hero">
+        <div><span class="eyebrow">BLACKWOLF V3.5.8 PROFESSIONAL MODE</span><h2>โหลดไฟล์ครบในหน้าเดียว พร้อมประมวลผลแบบมืออาชีพ</h2><p>ประมวลผลด้วย Background Worker จำแนกไฟล์จาก Sheet/Header และสร้าง Master + เช็คสถานะ ISSUE ใหม่สำหรับใช้วันถัดไป</p></div>
+        <div class="privacy-badge"><strong>2</strong><span>Working XLSX</span></div>
+      </div>
+
+      <article class="runtime-banner hidden" id="runtimeBanner"></article>
+
+      <article class="panel unified-panel">
+        <div class="panel-head">
+          <div><span class="step">01</span><h3>Work Package</h3><p>ลากไฟล์ทั้งหมดมาวางครั้งเดียว ระบบจำแนกและตรวจสอบให้อัตโนมัติ</p></div>
+          <button class="btn ghost" id="clearBtn" type="button">ล้างทั้งหมด</button>
+        </div>
+
+        <label class="drop-zone" id="dropZone">
+          <input id="bulkInput" type="file" accept=".xlsx,.xlsm,.xls,.txt" multiple hidden>
+          <span class="upload-icon">⇩</span>
+          <div><strong>ลากไฟล์ทั้งหมดมาวาง หรือคลิกเพื่อเลือกพร้อมกัน</strong><small>Required: Master, เช็คสถานะ ISSUE, Daily Report, M190 · Optional: SM, Blacklist, Auto-Mail 7.2</small></div>
+          <b>SELECT ALL FILES</b>
+        </label>
+
+        <div class="package-summary">
+          <div class="package-score"><strong id="readyCount">0/4</strong><span>Required Ready</span></div>
+          <div class="file-chips" id="fileChips"></div>
+        </div>
+
+        <div class="etl-inline-card">
+          <div class="etl-inline-head"><div><span class="etl-badge">AUTO-MAIL 7.2</span><strong>ใส่รายการ ETL เพิ่มเติม</strong><small>วางข้อความจาก Auto-Mail 7.2 ได้โดยตรง หรือแนบไฟล์ .txt พร้อมไฟล์อื่นด้านบน</small></div><button class="btn ghost compact" id="clearEtlBtn" type="button">ล้างข้อความ</button></div>
+          <textarea id="autoMail72Input" spellcheck="false" placeholder="1.7240991292:HP651502:HLABOR&#10;2.7240895649:HP651248:HLABOR"></textarea>
+          <div class="etl-stats"><span>Valid <b id="etlValid">0</b></span><span>Invalid <b id="etlInvalid">0</b></span><span>Duplicate <b id="etlDuplicate">0</b></span><em id="etlHint">รูปแบบ: ลำดับ.ProposalID:Policy:Group</em></div>
+        </div>
+
+
+        <div class="date-control-card">
+          <div><span class="date-badge">DATE T</span><strong>วันเริ่มต้น Manual</strong><small>ใช้เฉพาะเมื่อ Master ไม่มีวันที่ในคอลัมน์ T ระบบจะอ่าน Date คอลัมน์ T ก่อนเสมอ</small></div>
+          <input id="manualStartDate" type="date" aria-label="วันเริ่มต้น Manual">
+        </div>
+
+        <div class="action-strip">
+          <div class="inline-status" id="inlineStatus"><i></i><div><strong>รอไฟล์</strong><small>เลือก Required files ให้ครบ 4 รายการ</small></div></div>
+          <button class="btn secondary" id="preflightBtn" type="button" disabled>✓ ตรวจสอบไฟล์</button>
+          <button class="btn primary" id="runBtn" type="button" disabled>▶ Run & Create 2 Excel Files</button>
+        </div>
+      </article>
+
+     
+
+    
+    </section>
+
+    <section class="page" id="page-dashboard">
+      <div class="page-heading"><div><span class="eyebrow">EXECUTIVE VIEW</span><h2>Executive Dashboard</h2><p id="dashboardSubtitle">ยังไม่มีผลการประมวลผล</p></div><button class="btn ghost" data-go="prepare">สร้าง Run ใหม่</button></div>
+      <div class="kpi-grid">
+        <article class="kpi"><span>Pending Policies</span><strong id="kpiPending">0</strong><small>รอ Issue</small></article><article class="kpi"><span>Incomplete</span><strong id="kpiIncomplete">0</strong><small>ข้อมูลไม่สมบูรณ์</small></article><article class="kpi"><span>Menu E</span><strong id="kpiMenuE">0</strong><small>ติดปัญหาไม่เข้าเมนู E</small></article><article class="kpi"><span>Blacklist</span><strong id="kpiBlacklist">0</strong><small>รายการ Blacklist</small></article><article class="kpi accent"><span>Total Premium</span><strong id="kpiPremium">0</strong><small>บาท</small></article>
+      </div>
+      <div class="layout-two dashboard-layout"><article class="panel"><div class="panel-head"><div><h3>Status Distribution</h3><p>จำนวน ProposalID แยกตามสถานะ</p></div></div><div class="bar-chart" id="statusChart"></div></article><article class="panel"><div class="panel-head"><div><h3>Aging Distribution</h3><p>อายุงานนับจาก CreateDate</p></div></div><div class="bar-chart" id="agingChart"></div></article></div>
+      <article class="panel dashboard-recon"><div class="panel-head"><div><h3>Reconciliation</h3><p>ตรวจจำนวนรายการระหว่าง Source และ Output</p></div></div><div class="recon-grid" id="reconGrid"></div></article>
+    </section>
+
+    <section class="page" id="page-results">
+      <div class="page-heading"><div><span class="eyebrow">TWO WORKING FILES</span><h2>Approval & Download</h2><p>ดาวน์โหลดไฟล์หลักทั้งสองไฟล์และเก็บเองทุกวัน</p></div><button class="btn ghost" data-go="prepare">กลับไปหน้า Run</button></div>
+      <article class="panel empty-state" id="resultEmpty"><span>⇩</span><h3>ยังไม่มีไฟล์ผลลัพธ์</h3><p>เลือกไฟล์และ Run Workflow ก่อน</p></article>
+      <div id="resultContent" class="hidden">
+        <div class="result-summary" id="resultSummary"></div>
+        <div class="download-stack">
+          <button class="combined-download" id="downloadCombined"><span class="xlsx-badge">XLSX</span><div><strong>เช็คกรมธรรม์ต่างด้าวที่ยังไม่ออก — Master Working File</strong><small>ชื่อไฟล์มีวันที่ทำงาน · สูตร P:W · Data · SM · Black List · PV · Report</small></div><b>DOWNLOAD MASTER ⇩</b></button>
+          <button class="combined-download secondary-download" id="downloadIssue"><span class="xlsx-badge">XLSX</span><div><strong>เช็คสถานะ ISSUE — Working File</strong><small>Data รอบปัจจุบัน · Check = M190 รอบปัจจุบัน · ETL = Auto-Mail 7.2 รอบปัจจุบัน</small></div><b>DOWNLOAD ISSUE ⇩</b></button>
+        </div>
+          <article class="panel preflight-result hidden" id="preflightResult"></article>
+      <article class="panel progress-panel hidden" id="progressPanel">
+        <div class="progress-head"><div><h3>กำลังประมวลผล</h3><p id="progressMessage">กำลังเตรียม...</p></div><strong id="progressPct">0%</strong></div>
+        <div class="progress-track"><i id="progressBar"></i></div><div class="log-box" id="logBox"></div>
+      </article>
+       <article class="panel workbook-preview" id="workbookPreviewPanel">
+        <div class="panel-head"><div><span class="step">02</span><h3>รูปแบบ Workbook ผลลัพธ์</h3><p>Master ใหม่มีสูตร P:W พร้อมใช้วันถัดไป และไฟล์ ISSUE จะล้าง Check/ETL เดิมก่อนใส่ข้อมูลรอบปัจจุบัน</p></div><span class="count-chip">MASTER + ISSUE</span></div>
+        <div class="excel-window">
+          <div class="excel-ribbon"><span>BLACKWOLF — เช็คกรมธรรม์ต่างด้าวที่ยังไม่ออก</span><b id="previewMode">TEMPLATE PREVIEW</b></div>
+          <div class="formula-bar"><span>A1</span><i>fx</i><div id="formulaText">สถานะไม่ ISSUE.</div></div>
+          <div class="sheet-stage" id="sheetStage"></div>
+          <div class="sheet-tabs" id="sheetTabs">
+            <button data-sheet="Data">Data</button><button data-sheet="ข้อมูลไม่สมบูรณ์">ข้อมูลไม่สมบูรณ์</button><button data-sheet="Black List">Black List</button><button data-sheet="PV">PV</button><button data-sheet="PV Final">PV Final</button><button class="active" data-sheet="Report">Report</button>
+          </div>
+        </div>
+      </article>
+        <article class="panel table-panel detail-preview-panel">
+          <div class="detail-preview-head">
+            <div><span class="eyebrow">DETAIL CONTROL</span><h3>Pending Detail Preview</h3><p>ค้นหา กรอง และคลิกแต่ละแถวเพื่อดูรายละเอียดได้ทันที</p></div>
+            <div class="detail-actions"><button class="btn ghost" id="clearTableFiltersBtn" type="button">ล้างตัวกรอง</button></div>
+          </div>
+          <div class="detail-stat-grid" id="resultDetailStats">
+            <div><span>ทั้งหมด</span><strong>0</strong><small>รายการ</small></div><div class="warning"><span>ข้อมูลไม่สมบูรณ์</span><strong>0</strong><small>รายการ</small></div><div class="success"><span>พร้อมตรวจสอบ</span><strong>0</strong><small>รายการ</small></div><div class="duplicate-alien-stat"><span>alienCode ซ้ำ</span><strong id="duplicateAlienCodeCount">0</strong><small id="duplicateAlienRowCount">0 รายการ</small></div>
+          </div>
+          <div class="detail-toolbar">
+            <label class="detail-search"><span>⌕</span><input id="tableSearch" class="search" placeholder="ค้นหา alienCode, ProposalID, Policy, Status..."></label>
+            <select id="tableStatusFilter" aria-label="กรองตามสถานะ"><option value="">ทุกสถานะ</option></select>
+            <select id="tableAgingFilter" aria-label="กรองตาม Aging"><option value="">ทุกช่วง Aging</option><option value="1-7">1 - 7 วัน</option><option value="8-15">8 - 15 วัน</option><option value="16-30">16 - 30 วัน</option><option value="31+">มากกว่า 30 วัน</option></select>
+            <span class="detail-count" id="visibleResultCount">แสดง 0 รายการ</span>
+          </div>
+          <div class="alien-duplicate-alert hidden" id="alienDuplicateAlert" role="alert" aria-live="polite"></div>
+          <div class="detail-layout">
+            <div class="table-wrap detail-table-wrap"><table class="detail-table"><thead><tr><th>ProposalID</th><th>Policy</th><th>alienCode</th><th>CreateDate</th><th>Premium</th><th>Status</th><th>Aging</th></tr></thead><tbody id="resultTable"></tbody></table></div>
+            <aside class="detail-drawer" id="resultDetailDrawer">
+              <div class="detail-drawer-empty"><span>▤</span><strong>เลือกรายการเพื่อดูรายละเอียด</strong><small>คลิกแถวข้อมูลทางซ้าย ระบบจะแสดงรายละเอียดข้อมูลที่นี่</small></div>
+            </aside>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="page-report">
+      <div class="page-heading report-page-heading"><div><span class="eyebrow">MANAGEMENT VIEW</span><h2>Executive Report Viewer</h2><p>รายงานสรุปสำหรับนำเสนอผู้บริหาร บันทึกเป็น PDF หรือรูปภาพ PNG</p></div><div class="report-actions"><button class="btn ghost" id="refreshReportBtn">↻ Refresh</button><button class="btn ghost" id="saveReportImageBtn">▣ บันทึกรูปภาพ</button><button class="btn primary" id="printReportBtn">Print / Save PDF</button></div></div>
+      <article class="panel empty-state" id="reportEmpty"><span>▧</span><h3>ยังไม่มีรายงาน</h3><p>รัน Workflow ให้สำเร็จก่อน หรือเปิดจาก Run History</p></article>
+      <article class="report-sheet hidden" id="reportSheet">
+        <header class="management-report-header">
+          <div class="management-brand"><span>BW</span><div><strong>BLACKWOLF</strong><small>WORKFLOW CENTER</small></div></div>
+          <div class="management-title"><span>EXECUTIVE DAILY REPORT</span><h1>รายงานสรุปผลการตรวจสอบกรมธรรม์แรงงานต่างด้าว</h1><p>Foreign Worker Policy Review</p></div>
+          <div class="management-meta"><div><span>วันที่ประมวลผล</span><strong id="reportProcessed">-</strong></div><div><span>รอบข้อมูล</span><strong id="reportDateRange">-</strong></div><div><span>สถานะตรวจสอบ</span><strong id="reportValidation">-</strong></div></div>
+        </header>
+        <section class="management-kpi-strip">
+          <article class="mg-kpi mg-total"><span class="mg-icon">✓</span><div><small>กรมธรรม์คงเหลือทั้งหมด</small><strong id="reportPolicies">0</strong><em>กรมธรรม์</em></div></article><article class="mg-kpi mg-issue"><span class="mg-icon">!</span><div><small>รอ Issue</small><strong id="reportPending">0</strong><em>กรมธรรม์</em></div></article><article class="mg-kpi mg-incomplete"><span class="mg-icon">i</span><div><small>ข้อมูลไม่สมบูรณ์</small><strong id="reportIncomplete">0</strong><em>กรมธรรม์</em></div></article><article class="mg-kpi mg-menu"><span class="mg-icon">E</span><div><small>ติดปัญหา Menu E</small><strong id="reportMenuE">0</strong><em>กรมธรรม์</em></div></article><article class="mg-kpi mg-black"><span class="mg-icon">×</span><div><small>Blacklist</small><strong id="reportBlacklist">0</strong><em>กรมธรรม์</em></div></article><article class="mg-kpi mg-premium"><span class="mg-icon">฿</span><div><small>เบี้ยรวมทั้งหมด</small><strong id="reportPremium">0 บาท</strong><em>มูลค่างานคงเหลือ</em></div></article>
+        </section>
+        <section class="management-overview-grid">
+          <article class="management-summary-card"><header><small>EXECUTIVE SUMMARY</small><h2>สรุปภาพรวม</h2></header><div class="management-summary-body"><div><span>ช่วงข้อมูล</span><strong id="reportDateRangeSummary">-</strong></div><div><span>กรมธรรม์คงเหลือทั้งหมด</span><strong id="reportPoliciesSummary">0 กรมธรรม์</strong></div><div><span>อายุงานเกิน 7 วัน</span><strong class="text-orange" id="reportOverdue">0</strong></div><div><span>รายการต้องติดตามเป็นพิเศษ</span><strong class="text-purple" id="reportUrgent">0 กรมธรรม์</strong></div><div class="summary-premium"><span>เบี้ยรวมทั้งหมด</span><strong id="reportPremiumSummary">0 บาท</strong></div></div></article>
+          <article class="management-aging-card"><header><small>AGING DISTRIBUTION</small><h2>จำนวนวันที่ยังไม่ออกกรมธรรม์</h2></header><div class="aging-list"><div class="aging-row"><span>1 - 7 วัน</span><strong id="reportAge1">0</strong><div><i><b id="reportAge1Bar"></b></i><em id="reportAge1Pct">0%</em></div></div><div class="aging-row"><span>8 - 15 วัน</span><strong id="reportAge2">0</strong><div><i><b id="reportAge2Bar"></b></i><em id="reportAge2Pct">0%</em></div></div><div class="aging-row"><span>16 - 30 วัน</span><strong id="reportAge3">0</strong><div><i><b id="reportAge3Bar"></b></i><em id="reportAge3Pct">0%</em></div></div><div class="aging-row"><span>มากกว่า 30 วัน</span><strong id="reportAge4">0</strong><div><i><b id="reportAge4Bar"></b></i><em id="reportAge4Pct">0%</em></div></div></div></article>
+        </section>
+        <section class="management-status-section"><div class="management-section-title"><div><span>STATUS OVERVIEW</span><h2>สถานะงานคงเหลือ</h2></div><p id="reportExecutiveNote">-</p></div><div class="management-status-cards"><article class="status-blue"><div><span>รายการที่รอ ISSUE</span><small>ดำเนินการตามคิว</small></div><strong id="reportPendingCard">0</strong></article><article class="status-violet"><div><span>รายการข้อมูลไม่สมบูรณ์</span><small>ติดตามข้อมูลเพิ่ม</small></div><strong id="reportIncompleteCard">0</strong></article><article class="status-orange"><div><span>รายการติดปัญหา Menu E</span><small>เร่งตรวจสอบระบบ</small></div><strong id="reportMenuECard">0</strong></article><article class="status-dark"><div><span>รายการสถานะ Blacklist</span><small>ตรวจสอบกรณีพิเศษ</small></div><strong id="reportBlacklistCard">0</strong></article></div><table class="report-table"><thead><tr><th>สถานะ</th><th>จำนวนกรมธรรม์</th><th>สัดส่วน</th><th>ระดับติดตาม</th></tr></thead><tbody id="reportStatusBody"></tbody></table></section>
+        <section class="management-reconciliation-section"><div class="management-section-title"><div><span>WORKFLOW RECONCILIATION</span><h2>ผลการประมวลผลรอบล่าสุด</h2></div><p>ตรวจสอบความครบถ้วนก่อนใช้งาน</p></div><div class="management-reconciliation-grid"><div><span>Daily Report</span><strong id="reportDailyRows">0</strong><small>รายการผ่านเงื่อนไขวันที่</small></div><div><span>M190 PropID</span><strong id="reportM190">0</strong><small>รายการออกกรมธรรม์แล้ว</small></div><div><span>Auto-Mail 7.2 PropID</span><strong id="reportAutoMail72">0</strong><small>รายการเสริม</small></div><div><span>ตัดรายการออกแล้ว</span><strong id="reportIssuedRemoved">0</strong><small>ไม่นับเป็นงานคงเหลือ</small></div><div><span>Pending เข้า Master</span><strong id="reportPendingWritten">0</strong><small>รายการเขียนลง Master</small></div><div><span>Data เข้า ISSUE</span><strong id="reportIssueDataRows">0</strong><small>รายการข้อมูล ISSUE</small></div></div></section>
+        <footer class="management-report-footer"><div><strong>BLACKWOLF Workflow Platform</strong><span>รายงานสร้างภายในเครื่อง · สำหรับใช้ภายในองค์กร</span></div><div><span>Run ID</span><strong id="reportRunId">-</strong></div><div>V3.5.8 Professional Edition</div></footer>
+      </article>
+    </section>
+
+    <section class="page" id="page-history">
+      <div class="page-heading"><div><span class="eyebrow">LOCAL ARCHIVE</span><h2>Run History</h2><p>ประวัติการประมวลผลและไฟล์ผลลัพธ์ที่เก็บภายใน Browser เครื่องนี้</p></div><button class="btn ghost" id="refreshHistory">↻ Refresh</button></div>
+      <div class="history-retention-note"><div class="history-retention-main"><span class="history-retention-icon">◷</span><div><strong>จัดเก็บไฟล์ 4 วัน</strong><p id="historyRetentionText">ระบบนับถอยหลังและลบ Run เก่าอัตโนมัติเมื่อครบกำหนด โดยไม่ลบไฟล์ต้นฉบับของผู้ใช้</p></div></div><em>Auto Cleanup</em></div>
+      <article class="panel history-panel"><div class="history-list" id="historyList"><div class="empty-row">ยังไม่มีประวัติ</div></div></article>
+    </section>
+
+    <section class="page" id="page-settings">
+      <div class="settings-hero"><div><span class="eyebrow">CONTROL CENTER</span><h2>Settings & System Information</h2><p>ตั้งค่าการแสดงผล การช่วยเหลือ การจัดเก็บ และตรวจสอบความพร้อมของระบบ</p></div><button class="btn ghost settings-refresh" id="refreshSystemStatusBtn">↻ รีเฟรชสถานะ</button></div>
+      <div class="settings-grid">
+        <section class="settings-section"><div class="settings-section-heading"><span>01</span><div><h3>การแสดงผล</h3><p>ปรับภาษาและธีมให้เหมาะกับการใช้งาน</p></div></div><div class="settings-columns"><article class="panel settings-card"><div class="settings-card-head"><span class="settings-icon">文</span><div><h3>ภาษา</h3><p>เลือกภาษาหลักของเมนู</p></div></div><div class="segmented-control" id="languageControl"><button data-language="th">ไทย</button><button data-language="en">English</button></div></article><article class="panel settings-card"><div class="settings-card-head"><span class="settings-icon">◐</span><div><h3>ธีมขาว–ดำ</h3><p>สลับโหมดสว่างและโหมดมืด</p></div></div><div class="segmented-control" id="themeControl"><button data-theme-value="light">☀ ขาว</button><button data-theme-value="dark">● ดำ</button></div></article></div></section>
+        <section class="settings-section">
+          <div class="settings-section-heading"><span>02</span><div><h3>ช่วยเหลือและคู่มือ</h3><p>ติดต่อทีมงาน เปิดภาพแนะนำ และดาวน์โหลดคู่มือใช้งาน</p></div></div>
+          <div class="settings-columns settings-columns-three">
+            <article class="panel settings-card support-card line-support-card">
+              <div class="settings-card-head"><span class="settings-icon line-icon">LINE</span><div><h3>แจ้งปัญหาผ่าน LINE</h3><p>เปิดกลุ่ม LINE สำหรับแจ้งปัญหาและสอบถามการใช้งาน</p></div></div>
+              <a class="btn success wide link-button" href="https://line.me/ti/g/5yfX4kpasW" target="_blank" rel="noopener noreferrer">เปิดกลุ่ม LINE</a>
+            </article>
+            <article class="panel settings-card support-card">
+              <div class="settings-card-head"><span class="settings-icon">?</span><div><h3>วิธีใช้งานแบบภาพ</h3><p>เปิดภาพแนะนำขั้นตอนตรวจสอบและดาวน์โหลดรายงาน</p></div></div>
+              <button class="btn ghost wide" id="settingsGuideBtn" type="button">เปิดวิธีใช้งาน</button>
+            </article>
+            <article class="panel settings-card support-card">
+              <div class="settings-card-head"><span class="settings-icon pdf-icon">PDF</span><div><h3>ดาวน์โหลดคู่มือ PDF</h3><p>คู่มือการทำงาน BLACKWOLF สำหรับผู้ใช้งาน</p></div></div>
+              <a class="btn primary wide link-button" href="assets/BLACKWOLF_User_Manual_V3.5.4.pdf" download>ดาวน์โหลดคู่มือ</a>
+            </article>
+          </div>
+        </section>
+        <section class="settings-section"><div class="settings-section-heading"><span>03</span><div><h3>พื้นที่จัดเก็บผลลัพธ์</h3><p>ข้อมูล Run จัดเก็บใน Browser ชั่วคราว 4 วัน และอาจหายเมื่อ Clear Browser Data</p></div></div><article class="panel settings-card storage-card"><div class="settings-card-head"><span class="settings-icon">▣</span><div><h3>Browser Local Archive</h3><p>Excel ผลลัพธ์และ Summary ถูกเก็บใน IndexedDB ของเครื่องนี้ กรุณาดาวน์โหลดเก็บเองทุกวัน</p></div></div><div class="storage-metrics"><div><span>พื้นที่ใช้งาน</span><strong id="storageUsage">กำลังอ่าน...</strong></div><div><span>Persistent Storage</span><strong id="storagePersistence">กำลังตรวจสอบ...</strong></div><button class="btn primary" id="requestPersistenceBtn">ขอสิทธิ์ลดโอกาสถูกลบ</button></div></article></section>
+        <section class="settings-section"><div class="settings-section-heading"><span>04</span><div><h3>สถานะและข้อมูลระบบ</h3><p>ตรวจสอบองค์ประกอบสำคัญก่อนเริ่มประมวลผล</p></div></div><div class="settings-columns system-layout"><article class="panel settings-card"><div class="settings-card-head"><span class="settings-icon status-icon">●</span><div><h3>สถานะระบบ</h3><p>ตรวจ Browser Worker, Excel Engine, Archive และงานที่กำลังรัน</p></div></div><div class="system-status-grid"><div><span>Browser Engine</span><strong id="settingsEngineStatus">กำลังตรวจสอบ</strong></div><div><span>Web Worker</span><strong id="settingsWorkerStatus">กำลังตรวจสอบ</strong></div><div><span>Excel Parser</span><strong id="settingsExcelStatus">กำลังตรวจสอบ</strong></div><div><span>PowerShell</span><strong class="status-ok">ไม่ใช้</strong></div><div><span>Local Archive</span><strong id="settingsArchiveStatus">กำลังตรวจสอบ</strong></div><div><span>RUN ที่กำลังทำงาน</span><strong id="settingsActiveRuns">0</strong></div></div></article><article class="panel settings-card system-info-card"><div class="settings-card-head"><span class="settings-icon">ℹ</span><div><h3>ข้อมูลระบบ</h3><p>รายละเอียดเวอร์ชันและการประมวลผล</p></div></div><div class="setting-row"><span>Version</span><strong>3.5.8 Native Pivot + Stable Identity</strong></div><div class="setting-row"><span>Processing</span><strong>Background Web Worker</strong></div><div class="setting-row"><span>Internet</span><strong>ไม่ส่งข้อมูลออก</strong></div><div class="setting-row"><span>Data upload</span><strong>Local Browser only</strong></div></article></div></section>
+        <section class="settings-section"><div class="settings-section-heading"><span>05</span><div><h3>ความปลอดภัยและการรีเซ็ต</h3><p>ล้างประวัติและการตั้งค่าภายใน BLACKWOLF</p></div></div><article class="panel settings-card danger-card"><div class="settings-card-head"><span class="settings-icon">↺</span><div><h3>รีเซ็ตโปรแกรม</h3><p>ล้าง Run History, Excel ที่เก็บใน Browser, ภาษา และธีม โดยไม่ลบไฟล์ต้นฉบับ</p></div></div><button class="btn danger" id="resetProgramBtn">รีเซ็ตโปรแกรม</button></article></section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- STEP 7: guideModal คือ popup คู่มือรูปภาพสำหรับผู้ใช้ -->
+<div class="image-modal hidden" id="guideModal" role="dialog" aria-modal="true" aria-label="คู่มือขั้นตอนใช้งาน">
+  <button type="button" class="image-modal-close" id="guideClose" aria-label="ปิดคู่มือ">×</button>
+  <div class="image-modal-content quick-guide-modal quick-guide-example-one">
+    <div class="quick-guide-sheet">
+      <div class="quick-guide-header">
+        <div class="quick-guide-brand">
+          <span class="quick-guide-brand-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm16 0A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg></span>
+          <div><h2>BLACKWOLF V3.5.8</h2><p>Quick Guide - Master + เช็คสถานะ ISSUE พร้อมไว้ข้ามวัน</p></div>
+        </div>
+        <span class="quick-guide-badge">LOCAL PROCESSING</span>
+      </div>
+      <div class="quick-guide-grid">
+        <section class="quick-guide-card">
+          <div class="quick-guide-card-top"><span class="quick-guide-number">1</span><h3>แนบไฟล์หลัก 4 ไฟล์</h3></div>
+          <div class="quick-guide-card-body"><span class="quick-guide-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4l2 2H18.5A2.5 2.5 0 0 1 21 8.5v8A3.5 3.5 0 0 1 17.5 20h-11A3.5 3.5 0 0 1 3 16.5v-10Z"/></svg></span><div><p>Master, เช็คสถานะ ISSUE, Daily Report และ M190</p><p>แนบ SM / Blacklist / Auto-Mail 7.2 ตามที่มี</p></div></div>
+        </section>
+        <section class="quick-guide-card">
+          <div class="quick-guide-card-top"><span class="quick-guide-number">2</span><h3>ระบบจำแนกจากโครงสร้าง</h3></div>
+          <div class="quick-guide-card-body"><span class="quick-guide-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Zm-7.8 9.2L12 16.5l7.8-4.3L21 14l-9 5-9-5 1.2-1.8Zm0 4L12 20.5l7.8-4.3L21 18l-9 5-9-5 1.2-1.8Z"/></svg></span><div><p>ตรวจชื่อ Sheet และ Header เป็นหลัก</p><p>ชื่อไฟล์ใช้ช่วยเฉพาะกรณี SM / Blacklist ที่โครงสร้างคล้ายกัน</p></div></div>
+        </section>
+        <section class="quick-guide-card">
+          <div class="quick-guide-card-top"><span class="quick-guide-number">3</span><h3>ตรวจ Date คอลัมน์ T</h3></div>
+          <div class="quick-guide-card-body"><span class="quick-guide-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h2v3h6V2h2v3h1a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1V2Zm12 8H5v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9ZM7 12h3v3H7v-3Zm5 0h3v3h-3v-3Z"/></svg></span><div><p>อ่านวันเริ่มต้นจาก Master &gt; Data &gt; Date</p><p>กรอก Manual Start Date เฉพาะเมื่อ Master ไม่มี Date ที่อ่านได้</p></div></div>
+        </section>
+        <section class="quick-guide-card">
+          <div class="quick-guide-card-top"><span class="quick-guide-number">4</span><h3>สร้าง Check และ ETL ใหม่</h3></div>
+          <div class="quick-guide-card-body"><span class="quick-guide-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6a2 2 0 0 1 2 2h1a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1a2 2 0 0 1 2-2Zm0 3h6V4H9v1Zm8.7 4.3-7.4 7.4-4-4 1.4-1.4 2.6 2.6 6-6 1.4 1.4Z"/></svg></span><div><p>Check = M190 รอบปัจจุบัน</p><p>ETL = Auto-Mail 7.2 รอบปัจจุบัน ไม่เหลือข้อมูลเก่าค้าง</p></div></div>
+        </section>
+        <section class="quick-guide-card">
+          <div class="quick-guide-card-top"><span class="quick-guide-number">5</span><h3>Carry Forward รายการค้าง</h3></div>
+          <div class="quick-guide-card-body"><span class="quick-guide-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4H2V5l4.5 4L11 5v2H7.4A6 6 0 0 1 18 11h2Zm-16 2a8 8 0 0 0 14.9 4H22v2l-4.5-4-4.5 4v-2h3.6A6 6 0 0 1 6 13H4Z"/></svg></span><div><p>เก็บ Backlog, SM และ Blacklist เดิมไว้</p><p>รวมรายการเดิมด้วย CertificateNo หรือ alienCode + ProposalID ก่อนตัดรายการที่ออกกรมธรรม์แล้ว</p></div></div>
+        </section>
+        <section class="quick-guide-card">
+          <div class="quick-guide-card-top"><span class="quick-guide-number">6</span><h3>ดาวน์โหลดไฟล์หลัก 2 ไฟล์</h3></div>
+          <div class="quick-guide-card-body"><span class="quick-guide-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v10.2l3.6-3.6L18 11l-6 6-6-6 1.4-1.4 3.6 3.6V3ZM4 19h16v2H4v-2Z"/></svg></span><div><p>Master มีสูตร P:W และ ISSUE มี Data/Check/ETL ใหม่</p><p>ชื่อไฟล์มีวันที่ Run และต้องดาวน์โหลดเก็บเองทุกวัน</p></div></div>
+        </section>
+      </div>
+      <div class="quick-guide-footer">
+        <span class="quick-guide-footer-note"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm-1 8v7h2v-7h-2Zm0-3v2h2V7h-2Z"/></svg></i>หมายเหตุ: Run History เก็บใน Browser ชั่วคราว 4 วัน และอาจหายเมื่อ Clear Browser Data</span>
+        <strong>ดาวน์โหลด Master + ISSUE หลัง Run ทุกครั้ง</strong>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- STEP 8: previewDrillModal ใช้ดูข้อมูลด้านใน block PV/PV Final/Report -->
+<div class="preview-drill-modal hidden" id="previewDrillModal" role="dialog" aria-modal="true" aria-labelledby="previewDrillTitle">
+  <div class="preview-drill-dialog">
+    <header class="preview-drill-head"><div><span>EXCEL-LIKE DRILL-DOWN</span><h3 id="previewDrillTitle">รายละเอียดข้อมูลภายใน Block</h3><p id="previewDrillCount">0 รายการ</p></div><button type="button" id="previewDrillClose" aria-label="ปิดหน้าต่าง">×</button></header>
+    <div class="preview-drill-table-wrap"><table class="preview-drill-table"><thead><tr><th>No.</th><th>Date</th><th>ProposalID</th><th>Policy</th><th>Mticode</th><th>AgencyName</th><th>alienCode</th><th>alienNameEn</th><th>สถานะ</th><th>Aging</th><th>ช่วงอายุ</th><th>TotalPremium</th></tr></thead><tbody id="previewDrillBody"></tbody></table></div>
+    <footer class="preview-drill-foot">ข้อมูลนี้เป็นรายการด้านในของ PV / PV Final / Report ตาม Block ที่เลือก</footer>
+  </div>
+</div>
+<!-- STEP 9: confirmModal ใช้ยืนยัน action สำคัญ เช่น reset -->
+<div class="confirm-modal hidden" id="confirmModal"><div class="confirm-box"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText"></p><div><button class="btn ghost" id="confirmCancel">ยกเลิก</button><button class="btn danger" id="confirmOk">ยืนยัน</button></div></div></div>
+<div class="toast" id="toast"></div>
+<!-- STEP 10: โหลด scripts ตามลำดับ dependency: config → vendor → engine/db → auth → app -->
+<script src="config.js?v=3.5.8"></script>
+<script src="vendor/xlsx-js-style.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script src="engine.js?v=3.5.8"></script>
+<script src="db.js?v=3.5.8"></script>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="access-profile.js?v=3.5.8"></script>
+<script src="auth.js?v=3.5.8"></script>
+<script src="app.js?v=3.5.8"></script>
+
+
+</body>
+</html>

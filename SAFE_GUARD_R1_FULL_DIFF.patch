@@ -1,0 +1,660 @@
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/app.js	2026-07-06 04:16:32.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/app.js	2026-07-07 02:04:59.260419520 +0000
+@@ -95,11 +95,17 @@
+ // [L0048] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+   classifying:false,
+ // [L0049] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+-  diagnosticErrors:[]
++  diagnosticErrors:[],
++  // SAFE GUARD R1: รวม lock ของ action ที่ไม่ควรรันซ้อน เช่น upload/preflight/run/download
++  actionLocks:new Set(),
++  // SAFE GUARD R1: กัน confirm modal เปิดซ้อนกันหลายชั้น
++  confirmPending:false,
++  // SAFE GUARD R1: กัน bind event ซ้ำ หาก init ถูกเรียกซ้ำจาก browser/devtools โดยไม่ตั้งใจ
++  boundEvents:false
+ // [L0050] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ };
+ // [L0051] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+-let toastTimer,historyCountdownTimer,clockTimer,lastProgressAt=0;
++let toastTimer,historyCountdownTimer,clockTimer,pageJumpTimer,lastProgressAt=0;
+ // [L0052] ประกาศตัวแปร selectedDetailIndex แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+ let selectedDetailIndex=null;
+ // [L0053] ประกาศตัวแปร previewDrillRegistry แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+@@ -112,6 +118,8 @@
+ // ขั้นตอน: เป็น helper แบบ arrow function ใช้เรียกซ้ำในไฟล์นี้
+ // [L0057] ประกาศตัวแปร yieldUi แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+ const yieldUi=(milliseconds=0)=>new Promise(resolve=>setTimeout(resolve,milliseconds));
++// SAFE GUARD R1: ตรวจว่าหน้าจอกำลังยุ่งกับงานสำคัญหรือไม่ เพื่อปิดปุ่ม/กัน action ซ้อน
++function isUiBusy(){return state.running||state.classifying||state.actionLocks.has('preflight')||state.actionLocks.has('run')||state.actionLocks.has('history-open')||state.actionLocks.has('diagnostic-export')||state.actionLocks.has('report-image');}
+ // [L0058] กำหนดค่าคงที่ WORKER_INACTIVITY_TIMEOUTS สำหรับใช้เป็นค่ากลางของ flow นี้
+ const WORKER_INACTIVITY_TIMEOUTS={ping:4500,'detect-file':180000,'load-file':600000,validate:600000,run:900000,reset:120000};
+ // [L0059] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -274,6 +282,8 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0138] ประกาศฟังก์ชัน exportDiagnosticPackage เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function exportDiagnosticPackage(){
++  if(state.actionLocks.has('diagnostic-export')){toast('Diagnostic ZIP กำลังสร้างอยู่ กรุณารอให้จบก่อน',3000);return;}
++  state.actionLocks.add('diagnostic-export');refreshReady();
+ // [L0139] ประกาศตัวแปร button แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const button=$('#exportDiagnosticBtn'),status=$('#diagnosticExportStatus');
+ // [L0140] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+@@ -403,7 +413,7 @@
+ // [L0202] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+     toast(`สร้าง Diagnostic ZIP ไม่สำเร็จ: ${error.message}`,6500);
+ // [L0203] ส่วนที่ต้องทำเสมอหลัง try/catch เช่น ปลดล็อกปุ่ม เคลียร์สถานะ หรือคืน resource
+-  }finally{if(button)button.disabled=false;}
++  }finally{if(button)button.disabled=false;state.actionLocks.delete('diagnostic-export');refreshReady();}
+ // [L0204] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ }
+ // [L0205] บรรทัดว่าง ใช้เว้นช่วงให้โค้ดอ่านง่าย ไม่กระทบการทำงาน
+@@ -441,7 +451,9 @@
+ // [L0221] ประกาศฟังก์ชัน loadFiles เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function loadFiles(fileList){
+ // [L0222] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+-  if(state.classifying)return;
++  if(state.running){toast('กำลัง Run อยู่ กรุณารอให้จบหรือกด Cancel Run ก่อน Upload ใหม่',4500);return;}
++  if(state.classifying||state.actionLocks.has('upload')){toast('กำลังจำแนกไฟล์อยู่ กรุณารอให้จบก่อน',3000);return;}
++  state.actionLocks.add('upload');
+ // [L0223] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+   state.classifying=true;
+ // [L0224] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+@@ -491,7 +503,7 @@
+ // [L0246] จับ error จาก try block แล้วแปลงเป็นข้อความ/สถานะที่ผู้ใช้หรือระบบเข้าใจได้
+   }catch(error){recordDiagnosticError('loadFiles',error,'BW-FILE-READ');console.error(error);toast(`อ่านไฟล์ไม่สำเร็จ: ${error.message}`,6000);}
+ // [L0247] ส่วนที่ต้องทำเสมอหลัง try/catch เช่น ปลดล็อกปุ่ม เคลียร์สถานะ หรือคืน resource
+-  finally{state.classifying=false;refreshReady();}
++  finally{state.classifying=false;state.actionLocks.delete('upload');const input=$('#bulkInput');if(input)input.value='';refreshReady();}
+ // [L0248] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ }
+ // [L0249] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -499,7 +511,7 @@
+ // [L0250] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0251] ประกาศฟังก์ชัน invalidate เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+-function invalidate({resetWorker=true,clearWorkbooks=true}={}){if(clearWorkbooks)state.workbooks={};state.preflight=null;$('#preflightResult').classList.add('hidden');$('#progressPanel').classList.add('hidden');if(resetWorker){state.workerCachedRoles.clear();try{state.worker?.postMessage({id:++state.workerSeq,type:'reset'});}catch{}}refreshReady();}
++function invalidate({resetWorker=true,clearWorkbooks=true}={}){if(clearWorkbooks)state.workbooks={};state.preflight=null;$('#preflightResult')?.classList.add('hidden');$('#progressPanel')?.classList.add('hidden');if(resetWorker){state.workerCachedRoles.clear();try{state.worker?.postMessage({id:++state.workerSeq,type:'reset'});}catch{}}refreshReady();}
+ // [L0252] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // อธิบาย: ประเมินความพร้อมด้าน memory/storage ของ Browser ก่อนรันไฟล์ใหญ่
+ // [L0253] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -591,11 +603,15 @@
+ // [L0296] ประกาศฟังก์ชัน refreshReady เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ function refreshReady(){
+ // [L0297] สร้างตัวช่วยแบบ arrow function ชื่อ ready เพื่อย่อโค้ดและเรียกใช้ซ้ำในไฟล์นี้
+-  const ready=requiredRoles.every(role=>state.files[role]);
++  const ready=requiredRoles.every(role=>state.files[role]),busy=isUiBusy();
++// SAFE GUARD R1: ขณะ Upload/Preflight/Run ให้ปิดช่องทางที่เปลี่ยน input หรือโหลด output เพื่อกัน state ชนกัน
++  ['#bulkInput','#autoMail72Input','#manualStartDate','#clearEtlBtn','#clearBtn'].forEach(selector=>{const element=$(selector);if(element)element.disabled=busy;});
++  const dropZone=$('#dropZone');if(dropZone){dropZone.classList.toggle('disabled',busy);dropZone.setAttribute('aria-disabled',busy?'true':'false');}
++  const hasResult=!!state.result;['#downloadCombined','#downloadIssue','#saveReportImageBtn'].forEach(selector=>{const element=$(selector);if(element)element.disabled=busy||!hasResult;});
+ // [L0298] อ้างอิง element ในหน้าเว็บ เพื่ออ่านค่า แก้ข้อความ เปลี่ยน class หรือผูก event
+-  $('#preflightBtn').disabled=!ready||state.running||state.classifying;
++  $('#preflightBtn').disabled=!ready||busy;
+ // [L0299] อ้างอิง element ในหน้าเว็บ เพื่ออ่านค่า แก้ข้อความ เปลี่ยน class หรือผูก event
+-  $('#runBtn').disabled=!state.preflight?.ok||state.running||state.classifying;const cancel=$('#cancelRunBtn');if(cancel){cancel.classList.toggle('hidden',!state.running);cancel.disabled=!state.running||!state.workerReady;}
++  $('#runBtn').disabled=!state.preflight?.ok||busy;const cancel=$('#cancelRunBtn');if(cancel){cancel.classList.toggle('hidden',!state.running);cancel.disabled=!state.running||!state.workerReady;}
+ // [L0300] ประกาศตัวแปร box แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const box=$('#inlineStatus');
+ // [L0301] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+@@ -713,7 +729,7 @@
+ // [L0357] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+     if(state.worker)terminateWorker(appError('BW-WORKER-004','เริ่ม Worker รุ่นใหม่'));
+ // [L0358] ประกาศตัวแปร worker แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+-    const worker=new Worker('worker.js?v=3.5.8');state.worker=worker;state.workerGeneration++;
++    const worker=new Worker('worker.js?v=3.5.8-safe-r1');state.worker=worker;state.workerGeneration++;
+ // [L0359] กำหนด handler/ฟังก์ชันให้ worker.onmessage เพื่อรอรับเหตุการณ์หรือเรียกใช้งานภายหลัง
+     worker.onmessage=event=>{
+ // [L0360] ประกาศตัวแปร message แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+@@ -886,8 +902,11 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0444] ประกาศฟังก์ชัน runPreflight เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function runPreflight(){
++  if(state.running||state.classifying){toast('ระบบกำลังทำงานอยู่ กรุณารอให้จบก่อนตรวจไฟล์',3500);return;}
++  if(state.actionLocks.has('preflight')){toast('กำลัง Preflight อยู่ กรุณารอให้จบก่อน',3000);return;}
++  state.actionLocks.add('preflight');refreshReady();
+ // [L0445] ประกาศตัวแปร parsed แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+-  const parsed=BlackwolfEngine.parseEtl(state.etlText);if(parsed.invalid){toast(`Auto-Mail 7.2 ผิดรูปแบบ ${parsed.invalid} บรรทัด`,5000);return;}
++  const parsed=BlackwolfEngine.parseEtl(state.etlText);if(parsed.invalid){state.actionLocks.delete('preflight');refreshReady();toast(`Auto-Mail 7.2 ผิดรูปแบบ ${parsed.invalid} บรรทัด`,5000);return;}
+ // [L0446] ประกาศตัวแปร button แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const button=$('#preflightBtn');button.disabled=true;button.textContent='กำลังตรวจสอบ...';setStatus('VALIDATING','running');$('#logBox').innerHTML='';progress(1,state.workerReady?'เริ่มตรวจสอบด้วย Background Worker':'เริ่มตรวจสอบแบบ Fallback');
+ // [L0447] เริ่ม try block สำหรับคำสั่งที่อาจ error เพื่อให้ระบบจับและจัดการข้อผิดพลาดได้
+@@ -909,7 +928,7 @@
+ // [L0455] จับ error จาก try block แล้วแปลงเป็นข้อความ/สถานะที่ผู้ใช้หรือระบบเข้าใจได้
+   }catch(error){recordDiagnosticError('runPreflight',error,'BW-PREFLIGHT');state.preflight={ok:false};refreshReady();toast(errorText(error),5500);console.error(error);}
+ // [L0456] ส่วนที่ต้องทำเสมอหลัง try/catch เช่น ปลดล็อกปุ่ม เคลียร์สถานะ หรือคืน resource
+-  finally{button.textContent='✓ ตรวจสอบไฟล์';button.disabled=!requiredRoles.every(role=>state.files[role]);}
++  finally{state.actionLocks.delete('preflight');button.textContent='✓ ตรวจสอบไฟล์';refreshReady();}
+ // [L0457] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ }
+ // [L0458] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -919,7 +938,8 @@
+ // [L0460] ประกาศฟังก์ชัน runWorkflow เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function runWorkflow(){
+ // [L0461] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+-  if(!state.preflight?.ok||state.running)return;
++  if(!state.preflight?.ok||state.running||state.actionLocks.has('run'))return;
++  state.actionLocks.add('run');
+ // [L0462] อ้างอิง element ในหน้าเว็บ เพื่ออ่านค่า แก้ข้อความ เปลี่ยน class หรือผูก event
+   state.running=true;refreshReady();setStatus('RUNNING','running');$('#logBox').innerHTML='';progress(1,'เริ่ม BLACKWOLF V3.5.8 Hardened Workflow');
+ // [L0463] เริ่ม try block สำหรับคำสั่งที่อาจ error เพื่อให้ระบบจับและจัดการข้อผิดพลาดได้
+@@ -939,11 +959,11 @@
+ // [L0470] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+     }
+ // [L0471] รอคำสั่ง asynchronous ให้เสร็จก่อน เช่น อ่านไฟล์ เปิดฐานข้อมูล หรือรอ worker ตอบกลับ
+-    state.result=result;$('#currentRunLabel').textContent=result.runId;await saveRunRecord(result);setStatus('COMPLETED','success');$('#previewMode').textContent=`RUN ${result.runId}`;renderPreview(state.activePreview);renderDashboard();renderResults();renderReport();toast(`Run สำเร็จ: ${fmt(result.summary.TotalPolicies)} กรมธรรม์ · สร้างไฟล์หลัก 2 ไฟล์`,5000);setTimeout(()=>setPage('results'),350);
++    state.result=result;$('#currentRunLabel').textContent=result.runId;await saveRunRecord(result);setStatus('COMPLETED','success');$('#previewMode').textContent=`RUN ${result.runId}`;renderPreview(state.activePreview);renderDashboard();renderResults();renderReport();toast(`Run สำเร็จ: ${fmt(result.summary.TotalPolicies)} กรมธรรม์ · สร้างไฟล์หลัก 2 ไฟล์`,5000);clearTimeout(pageJumpTimer);pageJumpTimer=setTimeout(()=>setPage('results'),350);
+ // [L0472] จับ error จาก try block แล้วแปลงเป็นข้อความ/สถานะที่ผู้ใช้หรือระบบเข้าใจได้
+   }catch(error){const code=error?.code||'BW-RUN-001';recordDiagnosticError('runWorkflow',error,code);console.error(error);if(code==='BW-WORKER-003'){progress(100,`CANCELLED: ${errorText(error)}`);setStatus('CANCELLED','error');}else{progress(100,`ERROR: ${errorText(error)}`);setStatus('ERROR','error');toast(errorText(error),6500);}}
+ // [L0473] ส่วนที่ต้องทำเสมอหลัง try/catch เช่น ปลดล็อกปุ่ม เคลียร์สถานะ หรือคืน resource
+-  finally{state.running=false;refreshReady();}
++  finally{state.running=false;state.actionLocks.delete('run');refreshReady();}
+ // [L0474] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ }
+ // [L0475] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -969,7 +989,22 @@
+ // [L0485] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0486] ประกาศฟังก์ชัน downloadBlob เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+-function downloadBlob(blob,name){if(!blob){toast('ไม่พบไฟล์สำหรับดาวน์โหลด',4500);return;}const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download=name;document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);toast(`ดาวน์โหลด ${name}`);}
++function downloadBlob(blob,name){
++  if(!blob){toast('ไม่พบไฟล์สำหรับดาวน์โหลด',4500);return;}
++  const lockKey=`download:${name}`;
++  if(state.running||state.classifying){toast('กำลังประมวลผลอยู่ กรุณารอให้จบก่อนดาวน์โหลด',3500);return;}
++  if(state.actionLocks.has(lockKey)){toast('กำลังดาวน์โหลดไฟล์นี้อยู่ กรุณารอสักครู่',2500);return;}
++  state.actionLocks.add(lockKey);refreshReady();
++  let url='',anchor=null;
++  try{
++    url=URL.createObjectURL(blob);anchor=document.createElement('a');anchor.href=url;anchor.download=name;document.body.appendChild(anchor);anchor.click();toast(`ดาวน์โหลด ${name}`);
++  }catch(error){recordDiagnosticError('downloadBlob',error,'BW-DOWNLOAD');console.error(error);toast(`ดาวน์โหลดไม่สำเร็จ: ${error.message}`,6000);}
++  finally{
++    try{anchor?.remove();}catch{}
++    if(url)setTimeout(()=>{try{URL.revokeObjectURL(url);}catch{}},2500);
++    setTimeout(()=>{state.actionLocks.delete(lockKey);refreshReady();},800);
++  }
++}
+ // [L0487] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // อธิบาย: ดาวน์โหลดไฟล์ Master ที่สร้างจากผล run ล่าสุด
+ // [L0488] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -1230,6 +1265,8 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0616] ประกาศฟังก์ชัน saveReportImage เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function saveReportImage(){
++  if(state.actionLocks.has('report-image')){toast('กำลังบันทึกรูปรายงานอยู่ กรุณารอให้จบก่อน',3000);return;}
++  state.actionLocks.add('report-image');refreshReady();
+ // [L0617] ประกาศตัวแปร button แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const button=$('#saveReportImageBtn'),old=button.textContent;button.disabled=true;button.textContent='กำลังสร้างรูป...';
+ // [L0618] เริ่ม try block สำหรับคำสั่งที่อาจ error เพื่อให้ระบบจับและจัดการข้อผิดพลาดได้
+@@ -1241,7 +1278,7 @@
+ // [L0621] เริ่ม loop แบบวนซ้ำตามเงื่อนไข ใช้รอหรือทำงานจนกว่าจะครบเงื่อนไข
+     downloadBlob(blob,name);toast('บันทึกรายงานเป็น PNG สำเร็จ');
+ // [L0622] จับ error จาก try block แล้วแปลงเป็นข้อความ/สถานะที่ผู้ใช้หรือระบบเข้าใจได้
+-  }catch(error){recordDiagnosticError('saveReportImage',error,'BW-REPORT-IMAGE');console.error(error);toast(`บันทึกรูปภาพไม่สำเร็จ: ${error.message}`,6000);}finally{button.disabled=false;button.textContent=old;}
++  }catch(error){recordDiagnosticError('saveReportImage',error,'BW-REPORT-IMAGE');console.error(error);toast(`บันทึกรูปภาพไม่สำเร็จ: ${error.message}`,6000);}finally{state.actionLocks.delete('report-image');button.disabled=false;button.textContent=old;refreshReady();}
+ // [L0623] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ }
+ // [L0624] บรรทัดว่าง ใช้เว้นช่วงให้โค้ดอ่านง่าย ไม่กระทบการทำงาน
+@@ -1270,6 +1307,7 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0636] ประกาศฟังก์ชัน renderHistory เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function renderHistory(){
++  clearInterval(historyCountdownTimer);
+ // [L0637] เริ่ม try block สำหรับคำสั่งที่อาจ error เพื่อให้ระบบจับและจัดการข้อผิดพลาดได้
+   try{
+ // [L0638] รอคำสั่ง asynchronous ให้เสร็จก่อน เช่น อ่านไฟล์ เปิดฐานข้อมูล หรือรอ worker ตอบกลับ
+@@ -1281,7 +1319,7 @@
+ // [L0641] ผูก event listener เข้ากับ element/ระบบ เมื่อเกิดเหตุการณ์ เช่น click/input/submit จะเรียก callback ที่กำหนด
+     $$('[data-delete]').forEach(button=>button.addEventListener('click',async event=>{event.stopPropagation();const ok=await confirmAction('ลบ Run History',`ต้องการลบ Run ${button.dataset.delete} หรือไม่? การลบนี้ไม่กระทบไฟล์ที่ดาวน์โหลดเก็บเอง`);if(ok){await BlackwolfDB.remove(button.dataset.delete);if(state.result?.runId===button.dataset.delete){state.result=null;$('#currentRunLabel').textContent='-';renderResults();renderReport();}await renderHistory();toast('ลบ Run แล้ว');}}));
+ // [L0642] รอคำสั่ง asynchronous ให้เสร็จก่อน เช่น อ่านไฟล์ เปิดฐานข้อมูล หรือรอ worker ตอบกลับ
+-    clearInterval(historyCountdownTimer);historyCountdownTimer=setInterval(async()=>{const expired=$$('[data-expires-at]').some(element=>new Date(element.dataset.expiresAt)<=new Date());if(expired)await renderHistory();else $$('[data-expires-at]').forEach(element=>{element.textContent=formatCountdown(element.dataset.expiresAt);});},60000);
++    historyCountdownTimer=setInterval(async()=>{const expired=$$('[data-expires-at]').some(element=>new Date(element.dataset.expiresAt)<=new Date());if(expired)await renderHistory();else $$('[data-expires-at]').forEach(element=>{element.textContent=formatCountdown(element.dataset.expiresAt);});},60000);
+ // [L0643] จับ error จาก try block แล้วแปลงเป็นข้อความ/สถานะที่ผู้ใช้หรือระบบเข้าใจได้
+   }catch(error){recordDiagnosticError('renderHistory',error,'BW-HISTORY-READ');console.error(error);$('#historyList').innerHTML=`<div class="empty-row">อ่านประวัติไม่สำเร็จ: ${esc(error.message)}</div>`;}
+ // [L0644] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+@@ -1292,8 +1330,11 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0647] ประกาศฟังก์ชัน openHistoryRun เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function openHistoryRun(id){
++  if(isUiBusy()){toast('ระบบกำลังทำงานอยู่ กรุณารอให้จบก่อนเปิด History',3500);return;}
++  if(state.actionLocks.has('history-open')){toast('กำลังเปิด History อยู่ กรุณารอสักครู่',2500);return;}
++  state.actionLocks.add('history-open');refreshReady();
+ // [L0648] เริ่ม try block สำหรับคำสั่งที่อาจ error เพื่อให้ระบบจับและจัดการข้อผิดพลาดได้
+-  try{setStatus('LOADING','running');const record=await BlackwolfDB.get(id);if(!record)throw new Error('ไม่พบ Run หรือถูกลบครบ 4 วันแล้ว');state.result={runId:record.id,summary:record.summary,rows:record.rows||[],duplicateSummary:record.duplicateSummary||null,context:record.context||{},outputs:{master:record.masterWorkbook,issue:record.issueWorkbook,names:record.outputNames}};$('#currentRunLabel').textContent=record.id;$('#previewMode').textContent=`HISTORY ${record.id}`;renderPreview(state.activePreview);renderDashboard();renderResults();renderReport();setStatus('COMPLETED','success');setPage('results');toast(`เปิดประวัติ Run ${id}`);}catch(error){recordDiagnosticError('openHistory',error,'BW-HISTORY-OPEN');setStatus('ERROR','error');toast(error.message,5000);}
++  try{setStatus('LOADING','running');const record=await BlackwolfDB.get(id);if(!record)throw new Error('ไม่พบ Run หรือถูกลบครบ 4 วันแล้ว');state.result={runId:record.id,summary:record.summary,rows:record.rows||[],duplicateSummary:record.duplicateSummary||null,context:record.context||{},outputs:{master:record.masterWorkbook,issue:record.issueWorkbook,names:record.outputNames}};$('#currentRunLabel').textContent=record.id;$('#previewMode').textContent=`HISTORY ${record.id}`;renderPreview(state.activePreview);renderDashboard();renderResults();renderReport();setStatus('COMPLETED','success');setPage('results');toast(`เปิดประวัติ Run ${id}`);}catch(error){recordDiagnosticError('openHistory',error,'BW-HISTORY-OPEN');setStatus('ERROR','error');toast(error.message,5000);}finally{state.actionLocks.delete('history-open');refreshReady();}
+ // [L0649] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+ }
+ // [L0650] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -1301,7 +1342,16 @@
+ // [L0651] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0652] ประกาศฟังก์ชัน confirmAction เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+-function confirmAction(title,message){return new Promise(resolve=>{const modal=$('#confirmModal');$('#confirmTitle').textContent=title;$('#confirmText').textContent=message;modal.classList.remove('hidden');const done=value=>{modal.classList.add('hidden');$('#confirmOk').onclick=null;$('#confirmCancel').onclick=null;resolve(value);};$('#confirmOk').onclick=()=>done(true);$('#confirmCancel').onclick=()=>done(false);});}
++function confirmAction(title,message){
++  if(state.confirmPending)return Promise.resolve(false);
++  state.confirmPending=true;
++  return new Promise(resolve=>{
++    const modal=$('#confirmModal'),okButton=$('#confirmOk'),cancelButton=$('#confirmCancel');
++    $('#confirmTitle').textContent=title;$('#confirmText').textContent=message;modal.classList.remove('hidden');
++    const done=value=>{state.confirmPending=false;modal.classList.add('hidden');okButton.onclick=null;cancelButton.onclick=null;resolve(value);};
++    okButton.onclick=()=>done(true);cancelButton.onclick=()=>done(false);
++  });
++}
+ // [L0653] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // อธิบาย: อัปเดตสถานะ Browser/Worker/Storage ในหน้า Settings
+ // [L0654] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -1323,7 +1373,7 @@
+ // [L0662] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0663] ประกาศฟังก์ชัน openGuide เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+-function openGuide(){$('#guideModal').classList.remove('hidden');}
++function openGuide(){closePreviewDrilldown();$('#guideModal').classList.remove('hidden');}
+ // [L0664] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // อธิบาย: ปิดหน้าต่างคู่มือรูปภาพ
+ // [L0665] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -1409,7 +1459,7 @@
+ // [L0705] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0706] ประกาศฟังก์ชัน openPreviewDrilldown เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+-function openPreviewDrilldown(index){
++function openPreviewDrilldown(index){closeGuide();
+ // [L0707] ประกาศตัวแปร entry แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const entry=previewDrillRegistry[Number(index)],modal=$('#previewDrillModal');if(!entry||!modal)return;
+ // [L0708] ประกาศตัวแปร rows แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+@@ -1558,6 +1608,8 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0780] ประกาศฟังก์ชัน bind เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ function bind(){
++  if(state.boundEvents)return;
++  state.boundEvents=true;
+ // [L0781] ผูก event listener เข้ากับ element/ระบบ เมื่อเกิดเหตุการณ์ เช่น click/input/submit จะเรียก callback ที่กำหนด
+   $$('.nav').forEach(button=>button.addEventListener('click',()=>setPage(button.dataset.page)));$$('[data-go]').forEach(button=>button.addEventListener('click',()=>setPage(button.dataset.go)));
+ // [L0782] ผูก event listener เข้ากับ element/ระบบ เมื่อเกิดเหตุการณ์ เช่น click/input/submit จะเรียก callback ที่กำหนด
+@@ -1589,9 +1641,9 @@
+ // [L0795] ประกาศฟังก์ชัน init เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ async function init(){
+ // [L0796] ผูก event listener เข้ากับ element/ระบบ เมื่อเกิดเหตุการณ์ เช่น click/input/submit จะเรียก callback ที่กำหนด
+-  window.addEventListener('error',event=>recordDiagnosticError('window.error',event.error||new Error(event.message||'Window error'),'BW-WINDOW'));
++  if(!window.__BLACKWOLF_SAFE_GUARD_R1_ERRORS_BOUND){window.__BLACKWOLF_SAFE_GUARD_R1_ERRORS_BOUND=true;window.addEventListener('error',event=>recordDiagnosticError('window.error',event.error||new Error(event.message||'Window error'),'BW-WINDOW'));
+ // [L0797] ผูก event listener เข้ากับ element/ระบบ เมื่อเกิดเหตุการณ์ เช่น click/input/submit จะเรียก callback ที่กำหนด
+-  window.addEventListener('unhandledrejection',event=>recordDiagnosticError('window.unhandledrejection',event.reason instanceof Error?event.reason:new Error(String(event.reason||'Unhandled rejection')),'BW-PROMISE'));
++  window.addEventListener('unhandledrejection',event=>recordDiagnosticError('window.unhandledrejection',event.reason instanceof Error?event.reason:new Error(String(event.reason||'Unhandled rejection')),'BW-PROMISE'));}
+ // [L0798] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+   bind();applyTheme(storage.get(storageKey('theme'))||'light');applyLanguage(state.language);updateClock();clockTimer=setInterval(updateClock,1000);renderFiles();syncEtl(false);renderPreview('Report');renderResults();renderReport();
+ // [L0799] รอคำสั่ง asynchronous ให้เสร็จก่อน เช่น อ่านไฟล์ เปิดฐานข้อมูล หรือรอ worker ตอบกลับ
+
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/worker.js	2026-07-06 04:16:32.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/worker.js	2026-07-07 02:01:33.259648896 +0000
+@@ -13,7 +13,7 @@
+ // [L0007] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // ภาพรวม: ส่ง progress, heartbeat, result และ error กลับไปให้ UI แสดงสถานะ
+ // [L0008] ทำงานกับโครงสร้าง ZIP ภายในไฟล์ .xlsx เพื่ออ่าน/แก้ XML เช่น pivot/table/cache
+-importScripts('config.js?v=3.5.8','vendor/xlsx-js-style.min.js','vendor/jszip.min.js','engine.js?v=3.5.8');
++importScripts('config.js?v=3.5.8-safe-r1','vendor/xlsx-js-style.min.js','vendor/jszip.min.js','engine.js?v=3.5.8-safe-r1');
+ // [L0009] บรรทัดว่าง ใช้เว้นช่วงให้โค้ดอ่านง่าย ไม่กระทบการทำงาน
+ 
+ // [L0010] ประกาศตัวแปร cachedWorkbooks แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+@@ -22,6 +22,8 @@
+ let cachedFiles={};
+ // [L0012] ประกาศตัวแปร busyRequestId แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+ let busyRequestId=null;
++// SAFE GUARD R1: เก็บ stage ล่าสุด เพื่อช่วยส่ง error กลับไปให้ UI ถ้า worker error นอก try/catch
++let busyStage='idle';
+ // [L0013] บรรทัดว่าง ใช้เว้นช่วงให้โค้ดอ่านง่าย ไม่กระทบการทำงาน
+ 
+ // [L0014] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -30,6 +32,14 @@
+ // ขั้นตอน: รับ input → normalize/ประมวลผลตามหน้าที่ → คืนค่าให้ flow ถัดไป
+ // [L0016] ประกาศฟังก์ชัน reply เป็นขั้นตอนย่อยของระบบ เพื่อให้ส่วนอื่นเรียกใช้ซ้ำได้
+ function reply(id,type,payload,transfer){postMessage({id,type,...payload},transfer||[]);}
++// SAFE GUARD R1: ส่ง error แบบปลอดภัยจาก global worker handler โดยไม่ให้ handler พังซ้ำ
++function replyGlobalWorkerError(code,error){
++  try{if(busyRequestId!==null)reply(busyRequestId,'error',{error:{code,message:error?.message||String(error||'Worker global error'),stack:error?.stack||'',stage:busyStage||'global'}});}catch{}
++}
++// SAFE GUARD R1: ดัก error ที่หลุดออกนอก onmessage try/catch เช่น library throw async ข้างนอก
++self.addEventListener('error',event=>replyGlobalWorkerError('BW-WORKER-GLOBAL',event.error||new Error(event.message||'Worker global error')));
++// SAFE GUARD R1: ดัก Promise rejection ที่ไม่มี catch ใน Worker เพื่อไม่ให้ UI เงียบ
++self.addEventListener('unhandledrejection',event=>replyGlobalWorkerError('BW-WORKER-PROMISE',event.reason instanceof Error?event.reason:new Error(String(event.reason||'Worker unhandled rejection'))));
+ // [L0017] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+ // อธิบาย: แปลงชนิดคำสั่ง worker เป็น error code มาตรฐาน
+ // [L0018] คอมเมนต์เดิม อธิบายเจตนาหรือขั้นตอนของผู้พัฒนา ไม่ถูกรันเป็นโค้ด
+@@ -60,6 +70,7 @@
+ self.onmessage=async event=>{
+ // [L0031] ประกาศตัวแปร message แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const message=event.data||{},requestId=message.id,type=message.type;
++  if(!requestId||!type){reply(requestId||0,'error',{error:{code:'BW-WORKER-MESSAGE',message:'Worker message ต้องมี id และ type',stage:type||'unknown'}});return;}
+ // [L0032] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+   if(busyRequestId!==null){
+ // [L0033] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+@@ -71,7 +82,7 @@
+ // [L0036] ประกาศตัวแปร stopHeartbeat แล้วกำหนดค่าเริ่มต้นจากข้อมูลหรือผลคำนวณในบรรทัดนี้
+   const stopHeartbeat=beginHeartbeat(requestId,type||'unknown');
+ // [L0037] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+-  busyRequestId=requestId;
++  busyRequestId=requestId;busyStage=type||'unknown';
+ // [L0038] เริ่ม try block สำหรับคำสั่งที่อาจ error เพื่อให้ระบบจับและจัดการข้อผิดพลาดได้
+   try{
+ // [L0039] ตรวจเงื่อนไขก่อนเลือกทางเดินของโปรแกรม ถ้าเงื่อนไขจริงจึงทำ block ถัดไป
+@@ -175,7 +186,7 @@
+ // [L0088] ส่วนที่ต้องทำเสมอหลัง try/catch เช่น ปลดล็อกปุ่ม เคลียร์สถานะ หรือคืน resource
+   }finally{
+ // [L0089] คำสั่ง JavaScript ใน flow ปัจจุบัน ทำหน้าที่ประมวลผลข้อมูล อัปเดตสถานะ หรือเชื่อมขั้นตอนถัดไป
+-    stopHeartbeat();busyRequestId=null;
++    stopHeartbeat();busyRequestId=null;busyStage='idle';
+ // [L0090] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+   }
+ // [L0091] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/db.js	2026-07-06 04:16:32.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/db.js	2026-07-07 02:00:41.609977301 +0000
+@@ -57,7 +57,8 @@
+ // [L0029] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+     };
+ // [L0030] กำหนด handler/ฟังก์ชันให้ request.onsuccess เพื่อรอรับเหตุการณ์หรือเรียกใช้งานภายหลัง
+-    request.onsuccess=()=>resolve(request.result);
++    request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{try{db.close();}catch{}};resolve(db);};
++    request.onblocked=()=>reject(new Error('Local Archive ถูกแท็บอื่นเปิดค้างอยู่ กรุณาปิดแท็บ BLACKWOLF เก่าก่อน'));
+ // [L0031] กำหนด handler/ฟังก์ชันให้ request.onerror เพื่อรอรับเหตุการณ์หรือเรียกใช้งานภายหลัง
+     request.onerror=()=>reject(request.error||new Error('เปิด Local Archive ไม่สำเร็จ'));
+ // [L0032] ปิด block/object/array/function call ที่เปิดไว้ก่อนหน้า เพื่อให้โครงสร้างโค้ดสมบูรณ์
+
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/START_LOCAL_WEB.bat	2026-07-06 04:16:32.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/START_LOCAL_WEB.bat	2026-07-07 02:04:01.662064999 +0000
+@@ -1,112 +1,120 @@
+-@echo off
+-REM [L0001] ปิดการ echo คำสั่ง เพื่อให้หน้าต่าง command แสดงเฉพาะข้อความที่เราตั้งใจให้เห็น
+-REM [L0002] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
+-REM BLACKWOLF BATCH TEACHING COMMENTS: เปิด local web server ด้วย Python แล้วเปิด BLACKWOLF ผ่าน http://127.0.0.1
+-REM [L0003] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
+-REM ใช้ REM เป็น comment ของ .bat; ไม่ใช้ // เพราะ cmd.exe จะพยายามรันเป็นคำสั่ง
+-REM [L0004] เริ่ม local scope ของตัวแปรใน batch เพื่อลดผลกระทบกับ environment ภายนอก
+-setlocal EnableExtensions EnableDelayedExpansion
+-REM [L0005] ย้าย working directory ไปยังโฟลเดอร์โปรแกรม เพื่อให้ path อ้างอิงไฟล์ถูกต้อง
+-cd /d "%~dp0"
+-REM [L0006] ตั้งชื่อหน้าต่าง command prompt ให้รู้ว่าหน้าต่างนี้ทำงานอะไรอยู่
+-title BLACKWOLF V3.5.8 Local Web Launcher
+-REM [L0007] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
+-
+-REM [L0008] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
+-REM STEP 1: หา port ว่างช่วง 8765-8775
+-REM [L0009] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
+-set "PORT="
+-REM [L0010] เริ่ม loop ใน batch เช่น ไล่หา port ว่างหรือรอ server พร้อม
+-for /L %%P in (8765,1,8775) do (
+-REM [L0011] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-  netstat -ano -p tcp 2>nul | findstr /R /C:":%%P .*LISTENING" >nul
+-REM [L0012] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
+-  if errorlevel 1 if not defined PORT set "PORT=%%P"
+-REM [L0013] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-)
+-REM [L0014] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
+-if not defined PORT (
+-REM [L0015] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-  echo [BW-LAUNCH-001] Ports 8765-8775 are already in use.
+-REM [L0016] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-  echo Close an old BLACKWOLF server window and try again.
+-REM [L0017] หยุดรอผู้ใช้กดปุ่ม เพื่อให้เห็นข้อความก่อนหน้าต่างปิด
+-  pause
+-REM [L0018] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
+-  exit /b 1
+-REM [L0019] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-)
+-REM [L0020] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
+-set "URL=http://127.0.0.1:%PORT%"
+-REM [L0021] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
+-REM STEP 2: หา Python launcher ที่มีในเครื่อง
+-REM [L0022] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
+-set "PYTHON_CMD="
+-REM [L0023] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-where py >nul 2>nul && set "PYTHON_CMD=py"
+-REM [L0024] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
+-if not defined PYTHON_CMD where python >nul 2>nul && set "PYTHON_CMD=python"
+-REM [L0025] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
+-
+-REM [L0026] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
+-if not defined PYTHON_CMD (
+-REM [L0027] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-  echo.
+-REM [L0028] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-  echo [BW-LAUNCH-002] Python 3 was not found.
+-REM [L0029] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-  echo Background Worker requires http:// mode. Install Python 3 or use GitHub Pages.
+-REM [L0030] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-  echo The program will NOT open index.html directly because file:// can limit Worker and storage.
+-REM [L0031] หยุดรอผู้ใช้กดปุ่ม เพื่อให้เห็นข้อความก่อนหน้าต่างปิด
+-  pause
+-REM [L0032] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
+-  exit /b 2
+-REM [L0033] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-)
+-REM [L0034] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
+-
+-REM [L0035] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-echo Starting BLACKWOLF V3.5.8 on %URL%
+-REM [L0036] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
+-REM STEP 3: เปิด server window แล้ว bind เฉพาะ 127.0.0.1 เพื่อใช้งานในเครื่อง
+-REM [L0037] เปิดหน้าต่างใหม่หรือเปิด URL/โปรแกรมตามคำสั่ง
+-start "BLACKWOLF V3.5.8 Server" cmd /k "cd /d ""%~dp0"" ^&^& %PYTHON_CMD% -m http.server %PORT% --bind 127.0.0.1"
+-REM [L0038] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
+-
+-REM [L0039] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
+-REM STEP 4: รอ server พร้อมก่อนเปิด browser
+-REM [L0040] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
+-set "READY="
+-REM [L0041] เริ่ม loop ใน batch เช่น ไล่หา port ว่างหรือรอ server พร้อม
+-for /L %%I in (1,1,15) do (
+-REM [L0042] เรียก PowerShell จาก batch เพื่อทำงานที่ command prompt ทำเองไม่สะดวก
+-  powershell.exe -NoLogo -NoProfile -Command "try { $r=Invoke-WebRequest -UseBasicParsing -TimeoutSec 1 '%URL%'; if($r.StatusCode -ge 200){exit 0}else{exit 1} } catch { exit 1 }" >nul 2>nul
+-REM [L0043] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
+-  if not errorlevel 1 set "READY=1"
+-REM [L0044] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
+-  if defined READY goto :OPEN
+-REM [L0045] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-  timeout /t 1 /nobreak >nul
+-REM [L0046] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
+-)
+-REM [L0047] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
+-
+-REM [L0048] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-echo [BW-LAUNCH-003] Local server did not become ready within 15 seconds.
+-REM [L0049] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-echo Check the server window for details.
+-REM [L0050] หยุดรอผู้ใช้กดปุ่ม เพื่อให้เห็นข้อความก่อนหน้าต่างปิด
+-pause
+-REM [L0051] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
+-exit /b 3
+-REM [L0052] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
+-
+-REM [L0053] ประกาศ label สำหรับใช้กับ goto เพื่อกระโดดมาทำงานจุดนี้
+-:OPEN
+-REM [L0054] เปิดหน้าต่างใหม่หรือเปิด URL/โปรแกรมตามคำสั่ง
+-start "" "%URL%"
+-REM [L0055] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
+-echo BLACKWOLF opened successfully. Keep the server window open.
+-REM [L0056] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
+-exit /b 0
++@echo off
++REM [L0001] ปิดการ echo คำสั่ง เพื่อให้หน้าต่าง command แสดงเฉพาะข้อความที่เราตั้งใจให้เห็น
++REM [L0002] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
++REM BLACKWOLF BATCH TEACHING COMMENTS: เปิด local web server ด้วย Python แล้วเปิด BLACKWOLF ผ่าน http://127.0.0.1
++REM [L0003] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
++REM ใช้ REM เป็น comment ของ .bat; ไม่ใช้ // เพราะ cmd.exe จะพยายามรันเป็นคำสั่ง
++REM [L0004] เริ่ม local scope ของตัวแปรใน batch เพื่อลดผลกระทบกับ environment ภายนอก
++setlocal EnableExtensions EnableDelayedExpansion
++REM [L0005] ย้าย working directory ไปยังโฟลเดอร์โปรแกรม เพื่อให้ path อ้างอิงไฟล์ถูกต้อง
++cd /d "%~dp0"
++REM [L0006] ตั้งชื่อหน้าต่าง command prompt ให้รู้ว่าหน้าต่างนี้ทำงานอะไรอยู่
++title BLACKWOLF V3.5.8 Local Web Launcher
++REM [L0007] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
++
++REM [L0008] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
++REM STEP 1: หา port ว่างช่วง 8765-8775
++REM [L0009] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
++set "PORT="
++REM [L0010] เริ่ม loop ใน batch เช่น ไล่หา port ว่างหรือรอ server พร้อม
++for /L %%P in (8765,1,8775) do (
++REM [L0011] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++  netstat -ano -p tcp 2>nul | findstr /R /C:":%%P .*LISTENING" >nul
++REM [L0012] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
++  if errorlevel 1 if not defined PORT set "PORT=%%P"
++REM [L0013] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++)
++REM [L0014] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
++if not defined PORT (
++REM [L0015] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++  echo [BW-LAUNCH-001] Ports 8765-8775 are already in use.
++REM [L0016] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++  echo Close an old BLACKWOLF server window and try again.
++REM [L0017] หยุดรอผู้ใช้กดปุ่ม เพื่อให้เห็นข้อความก่อนหน้าต่างปิด
++  pause
++REM [L0018] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
++  exit /b 1
++REM [L0019] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++)
++REM [L0020] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
++set "URL=http://127.0.0.1:%PORT%"
++REM SAFE GUARD R1: เก็บเวลาเริ่มเปิดโปรแกรมไว้แสดง log ช่วย Debug
++set "LAUNCH_START=%DATE% %TIME%"
++REM [L0021] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
++REM STEP 2: หา Python launcher ที่มีในเครื่อง
++REM [L0022] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
++set "PYTHON_CMD="
++REM [L0023] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++where py >nul 2>nul && set "PYTHON_CMD=py"
++REM [L0024] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
++if not defined PYTHON_CMD where python >nul 2>nul && set "PYTHON_CMD=python"
++REM [L0025] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
++
++REM [L0026] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
++if not defined PYTHON_CMD (
++REM [L0027] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++  echo.
++REM [L0028] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++  echo [BW-LAUNCH-002] Python 3 was not found.
++REM [L0029] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++  echo Background Worker requires http:// mode. Install Python 3 or use GitHub Pages.
++REM [L0030] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++  echo The program will NOT open index.html directly because file:// can limit Worker and storage.
++REM [L0031] หยุดรอผู้ใช้กดปุ่ม เพื่อให้เห็นข้อความก่อนหน้าต่างปิด
++  pause
++REM [L0032] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
++  exit /b 2
++REM [L0033] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++)
++REM SAFE GUARD R1: อ่าน Python version เพื่อให้เวลามีปัญหาเปิดเว็บจะรู้ทันทีว่าเครื่องใช้ Python ตัวไหน
++set "PYTHON_VERSION=Unknown Python"
++for /f "delims=" %%V in ('%PYTHON_CMD% --version 2^>^&1') do set "PYTHON_VERSION=%%V"
++REM [L0034] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
++
++REM [L0035] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++echo Starting BLACKWOLF V3.5.8 on %URL%
++echo Port = %PORT%
++echo Python = %PYTHON_VERSION%
++echo Startup Time = %LAUNCH_START%
++REM [L0036] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
++REM STEP 3: เปิด server window แล้ว bind เฉพาะ 127.0.0.1 เพื่อใช้งานในเครื่อง
++REM [L0037] เปิดหน้าต่างใหม่หรือเปิด URL/โปรแกรมตามคำสั่ง
++start "BLACKWOLF V3.5.8 Server" cmd /k "cd /d ""%~dp0"" ^&^& %PYTHON_CMD% -m http.server %PORT% --bind 127.0.0.1"
++REM [L0038] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
++
++REM [L0039] คอมเมนต์ Batch เดิม ใช้อธิบายขั้นตอน ไม่ถูกรันเป็นคำสั่ง
++REM STEP 4: รอ server พร้อมก่อนเปิด browser
++REM [L0040] ตั้งค่าตัวแปรใน batch file เพื่อนำไปใช้ในคำสั่งถัดไป
++set "READY="
++REM [L0041] เริ่ม loop ใน batch เช่น ไล่หา port ว่างหรือรอ server พร้อม
++for /L %%I in (1,1,30) do (
++REM [L0042] เรียก PowerShell จาก batch เพื่อทำงานที่ command prompt ทำเองไม่สะดวก
++  powershell.exe -NoLogo -NoProfile -Command "try { $r=Invoke-WebRequest -UseBasicParsing -TimeoutSec 1 '%URL%'; if($r.StatusCode -ge 200){exit 0}else{exit 1} } catch { exit 1 }" >nul 2>nul
++REM [L0043] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
++  if not errorlevel 1 set "READY=1"
++REM [L0044] ตรวจเงื่อนไขใน batch ก่อนเลือกทำคำสั่ง เช่น ถ้าไม่มี Python หรือ port ถูกใช้
++  if defined READY goto :OPEN
++REM [L0045] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++  timeout /t 1 /nobreak >nul
++REM [L0046] คำสั่ง Batch สำหรับเปิดเครื่องมือหรือควบคุม flow การรันบน Windows
++)
++REM [L0047] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
++
++REM [L0048] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++echo [BW-LAUNCH-003] Local server did not become ready within 30 seconds.
++REM [L0049] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++echo Check the server window for details.
++REM [L0050] หยุดรอผู้ใช้กดปุ่ม เพื่อให้เห็นข้อความก่อนหน้าต่างปิด
++pause
++REM [L0051] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
++exit /b 3
++REM [L0052] บรรทัดว่าง แบ่งคำสั่งใน batch file ให้อ่านง่าย
++
++REM [L0053] ประกาศ label สำหรับใช้กับ goto เพื่อกระโดดมาทำงานจุดนี้
++:OPEN
++REM [L0054] เปิดหน้าต่างใหม่หรือเปิด URL/โปรแกรมตามคำสั่ง
++start "" "%URL%"
++REM [L0055] พิมพ์ข้อความสถานะให้ผู้ใช้เห็นในหน้าต่าง command
++echo BLACKWOLF opened successfully. Keep the server window open.
++REM [L0056] ออกจาก batch พร้อม exit code เพื่อบอกว่าสำเร็จหรือผิดพลาด
++exit /b 0
+
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/index.html	2026-07-06 04:16:32.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/index.html	2026-07-07 02:01:33.254485875 +0000
+@@ -22,7 +22,7 @@
+ 
+   <title>BLACKWOLF V3.5.8 — Professional Browser Web</title>
+ 
+-  <link rel="stylesheet" href="styles.css?v=3.5.8">
++  <link rel="stylesheet" href="styles.css?v=3.5.8-safe-r1">
+ 
+ 
+ </head>
+@@ -320,15 +320,15 @@
+ <div class="confirm-modal hidden" id="confirmModal"><div class="confirm-box"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText"></p><div><button class="btn ghost" id="confirmCancel">ยกเลิก</button><button class="btn danger" id="confirmOk">ยืนยัน</button></div></div></div>
+ <div class="toast" id="toast"></div>
+ <!-- STEP 10: โหลด scripts ตามลำดับ dependency: config → vendor → engine/db → auth → app -->
+-<script src="config.js?v=3.5.8"></script>
++<script src="config.js?v=3.5.8-safe-r1"></script>
+ <script src="vendor/xlsx-js-style.min.js"></script>
+ <script src="vendor/jszip.min.js"></script>
+-<script src="engine.js?v=3.5.8"></script>
+-<script src="db.js?v=3.5.8"></script>
++<script src="engine.js?v=3.5.8-safe-r1"></script>
++<script src="db.js?v=3.5.8-safe-r1"></script>
+ <script src="vendor/html2canvas.min.js"></script>
+-<script src="access-profile.js?v=3.5.8"></script>
+-<script src="auth.js?v=3.5.8"></script>
+-<script src="app.js?v=3.5.8"></script>
++<script src="access-profile.js?v=3.5.8-safe-r1"></script>
++<script src="auth.js?v=3.5.8-safe-r1"></script>
++<script src="app.js?v=3.5.8-safe-r1"></script>
+ 
+ 
+ </body>
+
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/styles.css	2026-07-06 04:18:44.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/styles.css	2026-07-07 02:01:33.259975183 +0000
+@@ -63,4 +63,12 @@
+ /* [L0032] กำหนดค่า `flex` ให้ element ในบล็อกปัจจุบัน เช่น สี ขนาด ระยะ หรือการจัดวาง */
+   flex: 1;
+ /* [L0033] ปิดบล็อก CSS ของ selector หรือ media query ก่อนหน้า */
+-}
+\ No newline at end of file
++}
++
++/* SAFE GUARD R1: fallback override กัน drop zone รับไฟล์ใหม่ระหว่างระบบ busy */
++.drop-zone.disabled,
++.drop-zone[aria-disabled="true"]{
++  pointer-events:none;
++  opacity:.62;
++  filter:grayscale(.15);
++}
+
+--- /mnt/data/bw_orig/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/css/components.css	2026-07-06 04:18:44.000000000 +0000
++++ /mnt/data/bw_work/BLACKWOLF_V3.5.8_UI355_LINE_BY_LINE_COMMENTED_SAFE_FIXED/css/components.css	2026-07-07 02:00:41.610359606 +0000
+@@ -14,3 +14,12 @@
+ .etl-inline-card{margin:0 20px 17px;border:1px solid #d9d7fb;background:linear-gradient(135deg,#fbfaff,#f5f3ff);border-radius:14px;padding:15px}.etl-inline-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.etl-inline-head strong,.etl-inline-head small{display:block}.etl-inline-head strong{font-size:13px;margin-top:7px}.etl-inline-head small{font-size:9px;color:var(--muted);margin-top:4px}.etl-badge{display:inline-flex;background:#5f4edc;color:#fff;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:900;letter-spacing:.07em}.etl-inline-card textarea{width:100%;height:115px;margin-top:12px;border:1px solid #cfcce9;border-radius:10px;background:var(--surface);color:var(--text);padding:11px;font:11px/1.6 Consolas,monospace;resize:vertical}.etl-inline-card textarea.invalid{border-color:#d64b5f;background:#fff7f8}.etl-stats{display:flex;gap:18px;align-items:center;margin-top:8px;font-size:9px;color:var(--muted)}.etl-stats b{color:var(--text)}.etl-stats em{font-style:normal;margin-left:auto}
+ /* [L0008] บรรทัดว่าง ใช้เว้นช่วงให้อ่านง่าย ไม่กระทบการแสดงผล */
+ 
++
++
++/* SAFE GUARD R1: ขณะระบบกำลัง Upload/Preflight/Run ให้ drop zone ดูชัดว่าไม่รับ input ใหม่ */
++.drop-zone.disabled,
++.drop-zone[aria-disabled="true"]{
++  pointer-events:none;
++  opacity:.62;
++  filter:grayscale(.15);
++}
