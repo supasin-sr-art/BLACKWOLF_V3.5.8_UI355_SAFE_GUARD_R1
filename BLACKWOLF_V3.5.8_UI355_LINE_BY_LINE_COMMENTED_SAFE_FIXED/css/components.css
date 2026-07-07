@@ -1,0 +1,25 @@
+/* [L0001] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* BLACKWOLF CSS TEACHING COMMENTS: css/components.css ควบคุมหน้าตา/สี/ระยะ/ responsive ของ UI; ใช้ CSS comment รูปแบบนี้เพื่อไม่ให้ browser ตีความผิด */
+/* [L0002] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* STEP: กฎในไฟล์นี้เป็นชั้นตกแต่ง/override ของ component เฉพาะส่วน */
+/* [L0003] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* Navigation, controls, upload, workbook preview and dashboard components */
+/* [L0004] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* V3.5.5 Professional Web components */
+/* [L0005] เริ่มกฎ CSS สำหรับ selector `.nav b` เพื่อกำหนดหน้าตาของ element/ส่วน UI นั้น */
+.nav b{font:inherit}.topbar{height:86px}.top-actions{gap:8px;flex-wrap:nowrap}.clock-box,.current-run-box{display:flex;flex-direction:column;text-align:right;padding:0 6px}.clock-box small,.current-run-box small{font-size:7px;letter-spacing:.12em}.clock-box strong,.current-run-box strong{font-size:10px;white-space:nowrap;margin-top:3px}.top-guide-btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;padding:10px 12px;font-weight:800;font-size:10px;cursor:pointer}.top-guide-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* [L0006] เริ่มกฎ CSS สำหรับ selector `.btn.success` เพื่อกำหนดหน้าตาของ element/ส่วน UI นั้น */
+.btn.success{background:#12a66a;color:#fff}.btn.danger{background:#c83a4e;color:#fff}.btn.compact{padding:7px 10px}.btn.wide,.link-button{display:block;width:100%;text-align:center;text-decoration:none}.dashboard-recon{margin-top:16px}
+/* [L0007] เริ่มกฎ CSS สำหรับ selector `.etl-inline-card` เพื่อกำหนดหน้าตาของ element/ส่วน UI นั้น */
+.etl-inline-card{margin:0 20px 17px;border:1px solid #d9d7fb;background:linear-gradient(135deg,#fbfaff,#f5f3ff);border-radius:14px;padding:15px}.etl-inline-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.etl-inline-head strong,.etl-inline-head small{display:block}.etl-inline-head strong{font-size:13px;margin-top:7px}.etl-inline-head small{font-size:9px;color:var(--muted);margin-top:4px}.etl-badge{display:inline-flex;background:#5f4edc;color:#fff;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:900;letter-spacing:.07em}.etl-inline-card textarea{width:100%;height:115px;margin-top:12px;border:1px solid #cfcce9;border-radius:10px;background:var(--surface);color:var(--text);padding:11px;font:11px/1.6 Consolas,monospace;resize:vertical}.etl-inline-card textarea.invalid{border-color:#d64b5f;background:#fff7f8}.etl-stats{display:flex;gap:18px;align-items:center;margin-top:8px;font-size:9px;color:var(--muted)}.etl-stats b{color:var(--text)}.etl-stats em{font-style:normal;margin-left:auto}
+/* [L0008] บรรทัดว่าง ใช้เว้นช่วงให้อ่านง่าย ไม่กระทบการแสดงผล */
+
+
+
+/* SAFE GUARD R1: ขณะระบบกำลัง Upload/Preflight/Run ให้ drop zone ดูชัดว่าไม่รับ input ใหม่ */
+.drop-zone.disabled,
+.drop-zone[aria-disabled="true"]{
+  pointer-events:none;
+  opacity:.62;
+  filter:grayscale(.15);
+}

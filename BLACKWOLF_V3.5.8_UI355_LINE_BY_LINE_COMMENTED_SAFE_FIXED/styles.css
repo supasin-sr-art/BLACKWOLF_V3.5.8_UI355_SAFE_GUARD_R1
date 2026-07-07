@@ -1,0 +1,74 @@
+/* [L0001] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* BLACKWOLF CSS TEACHING COMMENTS: styles.css ควบคุมหน้าตา/สี/ระยะ/ responsive ของ UI; ใช้ CSS comment รูปแบบนี้เพื่อไม่ให้ browser ตีความผิด */
+/* [L0002] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* STEP: ไฟล์นี้เป็น loader รวม CSS ย่อยทั้งหมดผ่าน @import ก่อนใส่ override เล็กน้อยท้ายไฟล์ */
+/* [L0003] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* BLACKWOLF V3.5.5 modular stylesheet loader */
+/* [L0004] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/base.css");
+/* [L0005] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/components.css");
+/* [L0006] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/report.css");
+/* [L0007] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/history.css");
+/* [L0008] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/settings.css");
+/* [L0009] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/overlays.css");
+/* [L0010] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/professional.css");
+/* [L0011] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/pivot-preview.css");
+/* [L0012] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/responsive.css");
+/* [L0013] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/print.css");
+/* [L0014] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/cyan-refresh.css");
+/* [L0015] บรรทัดว่าง ใช้เว้นช่วงให้อ่านง่าย ไม่กระทบการแสดงผล */
+
+/* [L0016] คำสั่งพิเศษของ CSS เช่น import/font/media ใช้ควบคุมกฎระดับไฟล์ */
+@import url("css/mti-navy-theme.css");
+/* [L0017] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* การ์ดส่วนช่วยเหลือและคู่มือ */
+/* [L0018] เริ่มกฎ CSS สำหรับ selector `.settings-columns-three .support-card` เพื่อกำหนดหน้าตาของ element/ส่วน UI นั้น */
+.settings-columns-three .support-card{
+/* [L0019] กำหนดค่า `display` ให้ element ในบล็อกปัจจุบัน เช่น สี ขนาด ระยะ หรือการจัดวาง */
+  display: flex;
+/* [L0020] กำหนดค่า `flex-direction` ให้ element ในบล็อกปัจจุบัน เช่น สี ขนาด ระยะ หรือการจัดวาง */
+  flex-direction: column;
+/* [L0021] กำหนดค่า `height` ให้ element ในบล็อกปัจจุบัน เช่น สี ขนาด ระยะ หรือการจัดวาง */
+  height: 100%;
+/* [L0022] ปิดบล็อก CSS ของ selector หรือ media query ก่อนหน้า */
+}
+/* [L0023] บรรทัดว่าง ใช้เว้นช่วงให้อ่านง่าย ไม่กระทบการแสดงผล */
+
+/* [L0024] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* เว้นช่องระหว่างข้อความกับปุ่ม */
+/* [L0025] บรรทัด CSS ต่อเนื่องจากกฎก่อนหน้า ใช้ควบคุมหน้าตา/เลย์เอาต์ของ UI */
+.settings-columns-three .support-card .btn,
+/* [L0026] เริ่มกฎ CSS สำหรับ selector `.settings-columns-three .support-card .link-button` เพื่อกำหนดหน้าตาของ element/ส่วน UI นั้น */
+.settings-columns-three .support-card .link-button{
+/* [L0027] กำหนดค่า `margin-top` ให้ element ในบล็อกปัจจุบัน เช่น สี ขนาด ระยะ หรือการจัดวาง */
+  margin-top: 8px;
+/* [L0028] ปิดบล็อก CSS ของ selector หรือ media query ก่อนหน้า */
+}
+/* [L0029] บรรทัดว่าง ใช้เว้นช่วงให้อ่านง่าย ไม่กระทบการแสดงผล */
+
+/* [L0030] ข้อความคอมเมนต์ CSS เดิม ใช้อธิบายไฟล์/ส่วนนี้ Browser จะไม่เอาไปคำนวณ style */
+/* ดันปุ่มให้อยู่ด้านล่างและตรงกันทุกการ์ด */
+/* [L0031] เริ่มกฎ CSS สำหรับ selector `.settings-columns-three .support-card .settings-card-head` เพื่อกำหนดหน้าตาของ element/ส่วน UI นั้น */
+.settings-columns-three .support-card .settings-card-head{
+/* [L0032] กำหนดค่า `flex` ให้ element ในบล็อกปัจจุบัน เช่น สี ขนาด ระยะ หรือการจัดวาง */
+  flex: 1;
+/* [L0033] ปิดบล็อก CSS ของ selector หรือ media query ก่อนหน้า */
+}
+
+/* SAFE GUARD R1: fallback override กัน drop zone รับไฟล์ใหม่ระหว่างระบบ busy */
+.drop-zone.disabled,
+.drop-zone[aria-disabled="true"]{
+  pointer-events:none;
+  opacity:.62;
+  filter:grayscale(.15);
+}

@@ -1,0 +1,6 @@
+BLACKWOLF V3.5.8
+Build: UI355-HIDDEN-PIVOT-STAGING-ISOLATION
+UI baseline: V3.5.5 (HTML/CSS layout locked)
+Engine baseline: V3.5.7 Native Pivot + Stable Identity + Reusable Master
+Fix scope: Report hidden Pivot staging only
+Fix: Align every status Pivot page-filter row at location-start minus 2, hide the complete no-data Pivot staging range, and hard-stop before download if any staging/page-filter row can appear below the final visible Grand Total. Pivot Cache and Drill-down behavior remain unchanged.

@@ -1,0 +1,270 @@
+{
+  "generated_at": "2026-07-06T03:04:44.525565",
+  "files": [
+    {
+      "file": "CREATOR_ACCESS_PROFILE_BUILDER.html",
+      "comment_style": "<!-- -->",
+      "original_lines": 13,
+      "commented_lines": 14,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__CREATOR_ACCESS_PROFILE_BUILDER.html.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/CREATOR_ACCESS_PROFILE_BUILDER.html",
+      "sha256_commented": "e12596769a85d90e981725c47ccb700a0ccb0c441578645dca4acca16dcd7713",
+      "sha256_original_backup": "e4b20f0ef0918fd1d680a024b58ad5dc2fabb357879380d9f65d8368dacc637b"
+    },
+    {
+      "file": "FINALIZE_BLACKWOLF_EXCEL.bat",
+      "comment_style": "REM",
+      "original_lines": 32,
+      "commented_lines": 64,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__FINALIZE_BLACKWOLF_EXCEL.bat.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/FINALIZE_BLACKWOLF_EXCEL.bat",
+      "sha256_commented": "ef2c5711e4c18160364cda82ac118ace7099b913e9d8ce23d811732200d4facf",
+      "sha256_original_backup": "2564b01c71ec7140130fa1daa7b8f0c17eb3794e2f5c215c55b89ae269bc4cce"
+    },
+    {
+      "file": "START_LOCAL_WEB.bat",
+      "comment_style": "REM",
+      "original_lines": 56,
+      "commented_lines": 112,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__START_LOCAL_WEB.bat.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/START_LOCAL_WEB.bat",
+      "sha256_commented": "f9c76bf5c83acf1ed85d1d62d082c51de7b66f8b2519f70a582d374af7f95c2f",
+      "sha256_original_backup": "b6f24054ffc604db9a56a8f5779ca0e3880e8fab6822d9b27b506a68726128b6"
+    },
+    {
+      "file": "access-profile.js",
+      "comment_style": "//",
+      "original_lines": 23,
+      "commented_lines": 46,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__access-profile.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/access-profile.js",
+      "sha256_commented": "a57e6d857cac522ba7f22984fb57fe5bf0aefbbe1fbef960139eeef996352abf",
+      "sha256_original_backup": "7253c37037ac8f717b836a00f1d324f1a515cc095b5a948f921066cc0567de07"
+    },
+    {
+      "file": "app.js",
+      "comment_style": "//",
+      "original_lines": 805,
+      "commented_lines": 1610,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__app.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/app.js",
+      "sha256_commented": "b5810ef118450bdf5fe89bc5d50a1889dc131ba86712b35fc02620d59872db0c",
+      "sha256_original_backup": "fefd14030bcddb655c411420c300d99ef4186d3770e9b80f31eec2486ceccd8c"
+    },
+    {
+      "file": "auth.js",
+      "comment_style": "//",
+      "original_lines": 169,
+      "commented_lines": 338,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__auth.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/auth.js",
+      "sha256_commented": "a684d83e5b66a979ad28922d960e9a9e11c9638afed4d16171d0c50bc5a972b7",
+      "sha256_original_backup": "bff279a8239845c0b2ee30e9153175849c73267a63a8e58ba48e19667b8d67a5"
+    },
+    {
+      "file": "config.js",
+      "comment_style": "//",
+      "original_lines": 21,
+      "commented_lines": 42,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__config.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/config.js",
+      "sha256_commented": "485707cc276b505e24d2c08d5b8f113c80d1fb03e4986c1e8416456c303880e5",
+      "sha256_original_backup": "d79492b457f98f60c5f11f2fbcb81ac62ed97f10ae50d8d015d4e37538e17f78"
+    },
+    {
+      "file": "css/base.css",
+      "comment_style": "/* */",
+      "original_lines": 4,
+      "commented_lines": 8,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__base.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/base.css",
+      "sha256_commented": "81dfe111bd7e5cb8585cfb4e45247760a9e3dd910a6884f96563c4fed4583d7a",
+      "sha256_original_backup": "4aac1caea31bfaa6053ac353026c5625c7d522d1bb75acef68e9f71424062539",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/components.css",
+      "comment_style": "/* */",
+      "original_lines": 8,
+      "commented_lines": 16,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__components.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/components.css",
+      "sha256_commented": "212bf1b37499fd45299cc0bd90b5c788a5f2f5e6cd62400c9d630e1ab0405b03",
+      "sha256_original_backup": "fc2c772551c441f6b9bd09f5a7d69451e1bd03db7c2eb6937eb4f2b9b7493e5c",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/cyan-refresh.css",
+      "comment_style": "/* */",
+      "original_lines": 114,
+      "commented_lines": 228,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__cyan-refresh.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/cyan-refresh.css",
+      "sha256_commented": "8f3fe0567d12710f28146896c1105ec5783597b00caa2466ea5a9f6445b9bd64",
+      "sha256_original_backup": "e125478d8505806304c37e5329726967831325cd49562e26725ecb97de20d401",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/history.css",
+      "comment_style": "/* */",
+      "original_lines": 6,
+      "commented_lines": 12,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__history.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/history.css",
+      "sha256_commented": "e7d1ca186f2558922167dc0836e5944163b23e74ad3cd8efe78c67c3664ffbaf",
+      "sha256_original_backup": "615c0d0278a203e16af913f0fa3b9190febecff0c1e70222bdd2773ce71ffc1b",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/mti-navy-theme.css",
+      "comment_style": "/* */",
+      "original_lines": 468,
+      "commented_lines": 936,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__mti-navy-theme.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/mti-navy-theme.css",
+      "sha256_commented": "8ff5847779b9139f4d4662213b303d42f8259a8ce5954bb09137bfb1ea8d5941",
+      "sha256_original_backup": "b3ffe2a67ee8e4ce6b4b38ed97e215d3621d545e03fd10e3d77b71b28cf24b2c",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/overlays.css",
+      "comment_style": "/* */",
+      "original_lines": 14,
+      "commented_lines": 28,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__overlays.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/overlays.css",
+      "sha256_commented": "83894ffe93381f117cbe470bbeabeb248b099fa7be4c18d7fab194e18a36cdaf",
+      "sha256_original_backup": "e6a471a838a21bf27a217f11a39f71105be297ce2a136d3d709e937eca4a0c14",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/pivot-preview.css",
+      "comment_style": "/* */",
+      "original_lines": 11,
+      "commented_lines": 22,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__pivot-preview.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/pivot-preview.css",
+      "sha256_commented": "4cc8ebb950d8c369b942e1e57f47ec0291deae09c1158ca1f0e501b1d08d5dcf",
+      "sha256_original_backup": "474f4f6cae6d465e4b8eda105eeb1d5f10498d056aa85fa53fb8b83d167c072b",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/print.css",
+      "comment_style": "/* */",
+      "original_lines": 4,
+      "commented_lines": 8,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__print.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/print.css",
+      "sha256_commented": "df6d63782418f82224133e1abd8fe975e8313fb8da51aa5ead6c209fff33d2b0",
+      "sha256_original_backup": "aae37ea7b62e3ff5e25235d7107606f9456028fc22f1bc01154f999063b58ad8",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/professional.css",
+      "comment_style": "/* */",
+      "original_lines": 54,
+      "commented_lines": 108,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__professional.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/professional.css",
+      "sha256_commented": "23b5a53d9042383ca0ae460084d7416fc00d5d5798d276481786e5cd6559dc7a",
+      "sha256_original_backup": "d64f948959a0cf033bd5def84adfb60bebc441399a4ef89acb25e2f8bea4b4d3",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/report.css",
+      "comment_style": "/* */",
+      "original_lines": 6,
+      "commented_lines": 12,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__report.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/report.css",
+      "sha256_commented": "d27e0325af5027884819129f87bd97cacd8543964c2a0156b8e03c02c2c257ec",
+      "sha256_original_backup": "59b8dcda87fc3734412a7e96bc7bfc1bdd9a2d53def6561569e30d8614c3401e",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/responsive.css",
+      "comment_style": "/* */",
+      "original_lines": 15,
+      "commented_lines": 30,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__responsive.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/responsive.css",
+      "sha256_commented": "1590b400b49b0a148508ab2520c92bfdc33ff468ca9ec1c324d029d47a6f60b5",
+      "sha256_original_backup": "eba98638c37039a4a3897e43ccfd5cf988221396ff6861b81d36d6ac57f64e16",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "css/settings.css",
+      "comment_style": "/* */",
+      "original_lines": 10,
+      "commented_lines": 20,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__css__settings.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/css/settings.css",
+      "sha256_commented": "fbf54be656137ca163c1c34a14dfaa41bda87afcaa586df05200463f4369effd",
+      "sha256_original_backup": "6922ff6431438ee91022f23d833c47fdaf560084593718c9024d41070d2aa683",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "db.js",
+      "comment_style": "//",
+      "original_lines": 77,
+      "commented_lines": 154,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__db.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/db.js",
+      "sha256_commented": "e69b948101e99047e84b030ca599dff3dc5db3d9e59d5d6d5c0fc0e5b03a5124",
+      "sha256_original_backup": "f1829f33fac1ab859b429dd691da02e0ccb875287c37e7f094b4c5390a9f96b8"
+    },
+    {
+      "file": "engine.js",
+      "comment_style": "//",
+      "original_lines": 1733,
+      "commented_lines": 3466,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__engine.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/engine.js",
+      "sha256_commented": "c1d6521dfc71acf0de366767737e4d9300a2402690c19fde3f99aa7ac4697320",
+      "sha256_original_backup": "5c3f301745aa2ed459a179157222d609f67c68cbbd1406c251624ad9aa103279"
+    },
+    {
+      "file": "index.html",
+      "comment_style": "<!-- -->",
+      "original_lines": 334,
+      "commented_lines": 335,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__index.html.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/index.html",
+      "sha256_commented": "2894e72a829cfe8e453d16fecbac21efc294c87fe84c7776651f9561bc80eca7",
+      "sha256_original_backup": "4131f66e0bafd1978a5a58e32868f501cfca4e4861b7db3c7b0f585dbc8106cd"
+    },
+    {
+      "file": "styles.css",
+      "comment_style": "/* */",
+      "original_lines": 33,
+      "commented_lines": 66,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__styles.css.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/styles.css",
+      "sha256_commented": "dec75a43d6db06379ee971d7afb5c2d9f584cf22ad80acc7902ef4bbc59f68d7",
+      "sha256_original_backup": "6abcdc3f8e39cdb6e8a01693ce118f77fb74c60b9b0a28a2d5a0cb3fa50810e4",
+      "safe_comment_fix": "nested_comment_safe"
+    },
+    {
+      "file": "tools/Finalize-BlackwolfExcel.ps1",
+      "comment_style": "#",
+      "original_lines": 450,
+      "commented_lines": 900,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__tools__Finalize-BlackwolfExcel.ps1.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/tools/Finalize-BlackwolfExcel.ps1",
+      "sha256_commented": "66f3882be6038c7d8f81bfbdcf22cf13383237f1fa9fe297b0b4819f8824ded8",
+      "sha256_original_backup": "972a82685047159c11fdc579a5027aa89b4b3506b91d2589f056d6e418dda225"
+    },
+    {
+      "file": "worker.js",
+      "comment_style": "//",
+      "original_lines": 91,
+      "commented_lines": 182,
+      "doc": "LINE_BY_LINE_DOCS_TH/LINE_BY_LINE__worker.js.md",
+      "original_backup": "ORIGINAL_CODE_BACKUP/worker.js",
+      "sha256_commented": "1e6ea7a07b9b09ab61dec7e91a474eceb7d581e3344acc51b78440a6215d18e9",
+      "sha256_original_backup": "42c4ca4c1dfb761dacf9a064bc87d651719881b46ed0fd7c00c6acee5a1da944"
+    }
+  ],
+  "safe_fixed_at": "2026-07-06T04:18:44",
+  "safe_fix_note": "Regenerated CSS comments with a state-aware method to avoid nested /* */ comments inside existing CSS block comments. JavaScript comment style remains //."
+}

@@ -1,0 +1,4 @@
+/* BLACKWOLF CSS TEACHING COMMENTS: css/print.css ควบคุมหน้าตา/สี/ระยะ/ responsive ของ UI; ใช้ CSS comment รูปแบบนี้เพื่อไม่ให้ browser ตีความผิด */
+/* STEP: กฎในไฟล์นี้ใช้เมื่อต้องพิมพ์หรือ export report */
+/* Print / Save PDF */
+@media print{body{background:#fff}.sidebar,.topbar,.page:not(#page-report),.report-page-heading,.toast,.image-modal,.confirm-modal{display:none!important}.app-shell{display:block}.page#page-report{display:block!important;padding:0}.report-sheet{display:block!important;max-width:none;width:100%;border:0;box-shadow:none}.management-report-header{grid-template-columns:170px 1fr 220px}.management-kpi-strip{grid-template-columns:repeat(6,1fr)}.management-overview-grid{grid-template-columns:320px 1fr}.management-status-cards{grid-template-columns:repeat(4,1fr)}.management-reconciliation-grid{grid-template-columns:repeat(6,1fr)}}
